@@ -133,7 +133,7 @@ export default function DashboardPage() {
 
           <section className="mt-8">
             <div className="mb-4 flex items-center justify-between">
-              <h2 className="text-lg font-semibold">Growing now</h2>
+              <h2 className="font-display text-2xl font-medium">Growing now</h2>
               {data.active_cycles.length > 0 && (
                 <Link to="/app/fields" className="inline-flex items-center gap-1 text-sm font-medium text-brand hover:underline">
                   Manage plantings <ArrowRight className="size-4" aria-hidden />

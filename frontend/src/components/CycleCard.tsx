@@ -143,14 +143,14 @@ export function CycleCard({ cycle, showField = false }: { cycle: CropCycle; show
   const progress = cycle.progress
 
   return (
-    <div className="rounded-xl border border-line bg-surface p-5 shadow-card">
+    <div className="rounded-2xl border border-line bg-surface p-5">
       <div className="flex items-start justify-between gap-3">
         <div className="flex min-w-0 items-center gap-3">
           <span className="grid size-10 shrink-0 place-items-center rounded-lg bg-accent-soft text-accent">
             {cycle.status === 'active' ? <Sprout className="size-5" /> : <Wheat className="size-5" />}
           </span>
           <div className="min-w-0">
-            <p className="truncate font-semibold">{cycle.crop_name}</p>
+            <p className="truncate font-display text-lg font-medium">{cycle.crop_name}</p>
             <p className="truncate text-sm text-fg-subtle">
               {showField ? (
                 <Link to={`/app/fields/${cycle.field_id}`} className="hover:underline">

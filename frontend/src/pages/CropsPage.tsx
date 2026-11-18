@@ -62,7 +62,7 @@ export default function CropsPage() {
               className={clsx(
                 'rounded-full border px-3 py-1 text-sm transition-colors',
                 category === cat
-                  ? 'border-brand bg-brand-soft text-brand-soft-fg'
+                  ? 'border-fg bg-fg text-bg'
                   : 'border-line text-fg-muted hover:bg-surface-muted',
               )}
             >
@@ -84,10 +84,10 @@ export default function CropsPage() {
             <Link
               key={crop.slug}
               to={`/app/crops/${crop.slug}`}
-              className="group flex flex-col rounded-xl border border-line bg-surface p-5 shadow-card transition-colors hover:border-brand/50"
+              className="group flex flex-col rounded-2xl border border-line bg-surface p-5 transition-colors hover:border-fg/30"
             >
               <div className="flex items-start justify-between gap-2">
-                <h2 className="font-semibold group-hover:text-brand">{crop.name}</h2>
+                <h2 className="font-display text-lg font-medium group-hover:underline decoration-highlight decoration-2 underline-offset-4">{crop.name}</h2>
                 <Badge>{CATEGORY_LABELS[crop.category]?.replace(/s$/, '') ?? crop.category}</Badge>
               </div>
               <p className="mt-2 line-clamp-3 flex-1 text-sm text-fg-muted">{crop.description}</p>

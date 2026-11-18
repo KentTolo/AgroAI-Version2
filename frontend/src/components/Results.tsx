@@ -22,7 +22,7 @@ export function PredictionList({ predictions }: { predictions: CropPrediction[] 
           </div>
           <div className="h-2 overflow-hidden rounded-full bg-surface-muted">
             <div
-              className={clsx('h-full rounded-full', index === 0 ? 'bg-brand' : 'bg-line-strong')}
+              className={clsx('h-full rounded-full', index === 0 ? 'bg-fg' : 'bg-line-strong')}
               style={{ width: `${Math.max(p.probability * 100, 1)}%` }}
             />
           </div>
@@ -151,7 +151,7 @@ export function AdvisoryResult({ advisory }: { advisory: Advisory }) {
         <ScoreRing score={advisory.score} />
         <div className="min-w-0">
           <Badge tone={verdict.tone}>{verdict.label}</Badge>
-          <h3 className="mt-2 text-xl font-semibold">{advisory.crop_name}</h3>
+          <h3 className="mt-2 font-display text-3xl font-medium">{advisory.crop_name}</h3>
           <p className="mt-1 text-sm text-fg-muted">{advisory.summary}</p>
           {advisory.model_probability !== null && (
             <p className="mt-2 text-xs text-fg-subtle">
@@ -177,7 +177,7 @@ export function ConditionTiles({ conditions }: { conditions: GrowingConditions }
   return (
     <dl className="grid grid-cols-2 gap-2 sm:grid-cols-4 lg:grid-cols-7">
       {PARAMETERS.map((p) => (
-        <div key={p.key} className="rounded-lg bg-surface-muted px-3 py-2">
+        <div key={p.key} className="rounded-xl bg-surface-muted px-3 py-2.5">
           <dt className="text-xs text-fg-subtle">{p.label}</dt>
           <dd className="mt-0.5 text-sm font-semibold tabular-nums">
             {formatNumber(conditions[p.key])}

@@ -39,7 +39,7 @@ export function ReadingsChart({ readings }: { readings: Reading[] }) {
             className={clsx(
               'rounded-full border px-3 py-1 text-xs font-medium transition-colors',
               metric === p.key
-                ? 'border-brand bg-brand-soft text-brand-soft-fg'
+                ? 'border-fg bg-fg text-bg'
                 : 'border-line text-fg-muted hover:bg-surface-muted',
             )}
           >

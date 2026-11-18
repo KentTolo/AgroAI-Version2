@@ -37,7 +37,7 @@ export function Dialog({ open, onClose, title, description, children, footer, si
         if (event.target === ref.current) onClose()
       }}
       className={clsx(
-        'm-auto w-[calc(100%-2rem)] rounded-2xl border border-line bg-surface p-0 text-fg shadow-pop',
+        'm-auto w-[calc(100%-2rem)] rounded-3xl border border-line bg-surface p-0 text-fg shadow-pop',
         size === 'md' ? 'max-w-lg' : 'max-w-3xl',
       )}
     >
@@ -45,7 +45,7 @@ export function Dialog({ open, onClose, title, description, children, footer, si
         <div className="flex max-h-[85dvh] flex-col">
           <div className="flex items-start justify-between gap-4 border-b border-line px-5 py-4">
             <div>
-              <h2 id={titleId} className="text-base font-semibold">
+              <h2 id={titleId} className="font-display text-xl font-medium">
                 {title}
               </h2>
               {description && <p className="mt-0.5 text-sm text-fg-subtle">{description}</p>}
@@ -99,14 +99,14 @@ export function ConfirmDialog({
         <>
           <button
             type="button"
-            className="h-10 rounded-lg border border-line-strong px-4 text-sm font-medium hover:bg-surface-muted"
+            className="h-10 rounded-full border border-line-strong px-5 text-sm font-semibold hover:bg-surface-muted"
             onClick={onClose}
           >
             Cancel
           </button>
           <button
             type="button"
-            className="h-10 rounded-lg bg-danger px-4 text-sm font-medium text-white hover:opacity-90 disabled:opacity-60"
+            className="h-10 rounded-full bg-danger px-5 text-sm font-semibold text-white hover:opacity-90 disabled:opacity-60"
             onClick={onConfirm}
             disabled={loading}
           >

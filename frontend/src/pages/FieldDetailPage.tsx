@@ -285,7 +285,7 @@ function CyclesSection({ field }: { field: Field }) {
   return (
     <section>
       <div className="mb-4 flex items-center justify-between gap-3">
-        <h2 className="text-lg font-semibold">Plantings</h2>
+        <h2 className="font-display text-2xl font-medium">Plantings</h2>
         <Button size="sm" icon={<Sprout />} onClick={() => setOpen(true)}>
           Start planting
         </Button>

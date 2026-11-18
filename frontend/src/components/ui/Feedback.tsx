@@ -57,7 +57,7 @@ export function Alert({
   return (
     <div
       role={tone === 'danger' ? 'alert' : 'status'}
-      className={clsx('flex gap-3 rounded-lg px-4 py-3 text-sm', badgeTones[tone], className)}
+      className={clsx('flex gap-3 rounded-xl px-4 py-3 text-sm', badgeTones[tone], className)}
     >
       <Icon className="mt-0.5 size-4 shrink-0" aria-hidden />
       <div className="min-w-0 space-y-1">
@@ -83,10 +83,10 @@ export function EmptyState({
 }) {
   return (
     <div className={clsx('flex flex-col items-center px-6 py-12 text-center', className)}>
-      <div className="mb-4 grid size-12 place-items-center rounded-full bg-brand-soft text-brand-soft-fg [&_svg]:size-6">
+      <div className="mb-4 grid size-12 place-items-center rounded-2xl bg-highlight text-highlight-fg [&_svg]:size-6">
         {icon}
       </div>
-      <h3 className="text-base font-semibold text-fg">{title}</h3>
+      <h3 className="font-display text-xl font-medium text-fg">{title}</h3>
       {description && <p className="mt-1 max-w-sm text-sm text-fg-subtle">{description}</p>}
       {action && <div className="mt-5">{action}</div>}
     </div>

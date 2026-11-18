@@ -1,10 +1,12 @@
 import { zodResolver } from '@hookform/resolvers/zod'
+import { Check } from 'lucide-react'
 import { useState, type ReactNode } from 'react'
 import { useForm } from 'react-hook-form'
 import { Link, useLocation, useNavigate } from 'react-router'
 import { z } from 'zod'
 import { useAuth } from '@/auth/useAuth'
 import { Logo } from '@/components/Logo'
+import { Topography } from '@/components/Topography'
 import { Button } from '@/components/ui/Button'
 import { Alert } from '@/components/ui/Feedback'
 import { FormField, Input } from '@/components/ui/Form'
@@ -13,30 +15,39 @@ import { useDocumentTitle } from '@/lib/useDocumentTitle'
 function AuthLayout({ title, subtitle, children }: { title: string; subtitle: ReactNode; children: ReactNode }) {
   useDocumentTitle(title)
   return (
-    <div className="grid min-h-dvh lg:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)]">
+    <div className="grid min-h-dvh lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
       <div className="flex flex-col px-6 py-8 sm:px-12">
         <Link to="/" className="self-start">
           <Logo />
         </Link>
         <div className="mx-auto flex w-full max-w-sm flex-1 flex-col justify-center py-12">
-          <h1 className="text-2xl font-semibold tracking-tight">{title}</h1>
-          <p className="mt-1.5 text-sm text-fg-muted">{subtitle}</p>
-          <div className="mt-8">{children}</div>
+          <h1 className="font-display text-4xl font-medium tracking-tight">{title}</h1>
+          <p className="mt-3 text-sm text-fg-muted">{subtitle}</p>
+          <div className="mt-10">{children}</div>
         </div>
       </div>
-      <div className="relative hidden lg:block">
-        <img
-          src="/landscape.jpg"
-          alt="Green hills and farmland in Lesotho"
-          className="absolute inset-0 size-full object-cover"
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
-        <blockquote className="absolute inset-x-10 bottom-10 text-white">
-          <p className="max-w-md text-xl leading-snug font-medium">
-            “Plant what your land is ready for, and know what it needs before you sow.”
+      <div className="relative m-3 hidden overflow-hidden rounded-[2rem] bg-ink text-ink-fg lg:block">
+        <Topography className="absolute inset-0 size-full text-highlight" rings={16} seed={5} />
+        <div className="relative flex h-full flex-col justify-end p-12">
+          <p className="max-w-md font-display text-3xl leading-snug font-medium">
+            Plant what your land is ready for, and know what it needs{' '}
+            <span className="text-highlight italic">before you sow.</span>
           </p>
-          <footer className="mt-3 text-sm text-white/75">AgroAI · built for smallholder farmers</footer>
-        </blockquote>
+          <ul className="mt-8 space-y-3 text-sm text-ink-fg/75">
+            {[
+              'Crop rankings with an honest confidence level',
+              'Step-by-step fixes for soil and climate gaps',
+              'Every planting tracked from sowing to harvest',
+            ].map((t) => (
+              <li key={t} className="flex items-center gap-3">
+                <span className="grid size-5 place-items-center rounded-full bg-highlight text-highlight-fg">
+                  <Check className="size-3" strokeWidth={3} aria-hidden />
+                </span>
+                {t}
+              </li>
+            ))}
+          </ul>
+        </div>
       </div>
     </div>
   )
@@ -76,7 +87,7 @@ export function LoginPage() {
       subtitle={
         <>
           New to AgroAI?{' '}
-          <Link to="/register" className="font-medium text-brand hover:underline">
+          <Link to="/register" className="font-semibold text-fg underline decoration-highlight decoration-2 underline-offset-4 hover:decoration-fg">
             Create an account
           </Link>
         </>
@@ -150,7 +161,7 @@ export function RegisterPage() {
       subtitle={
         <>
           Already registered?{' '}
-          <Link to="/login" className="font-medium text-brand hover:underline">
+          <Link to="/login" className="font-semibold text-fg underline decoration-highlight decoration-2 underline-offset-4 hover:decoration-fg">
             Sign in
           </Link>
         </>

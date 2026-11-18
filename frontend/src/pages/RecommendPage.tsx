@@ -31,7 +31,7 @@ function RecommendationResult({ rec }: { rec: Recommendation }) {
       <div>
         <p className="text-sm text-fg-subtle">Best match</p>
         <div className="mt-1 flex flex-wrap items-center gap-3">
-          <h2 className="text-3xl font-semibold tracking-tight">{top.name}</h2>
+          <h2 className="font-display text-3xl font-medium tracking-tight">{top.name}</h2>
           <Badge tone={confidence.tone}>
             {confidence.label} · {formatPercent(top.probability)}
           </Badge>

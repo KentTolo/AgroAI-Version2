@@ -8,12 +8,12 @@ import {
 } from 'react'
 
 const control =
-  'block w-full rounded-lg border bg-surface px-3 text-sm text-fg placeholder:text-fg-subtle transition-colors focus:outline-none focus:ring-2 focus:ring-ring/40 disabled:opacity-60'
+  'block w-full rounded-xl border bg-surface px-3.5 text-sm text-fg placeholder:text-fg-subtle transition-colors focus:outline-none focus:ring-2 focus:ring-ring/40 disabled:opacity-60'
 
 function controlClass(invalid: boolean, extra?: string) {
   return clsx(
     control,
-    invalid ? 'border-danger focus:border-danger' : 'border-line-strong focus:border-ring',
+    invalid ? 'border-danger focus:border-danger' : 'border-line-strong hover:border-fg/30 focus:border-ring',
     extra,
   )
 }

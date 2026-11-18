@@ -1,28 +1,26 @@
 import { clsx } from 'clsx'
 import {
   BookOpen,
+  ChevronDown,
   ClipboardCheck,
   History,
-  LayoutDashboard,
+  LayoutGrid,
   LogOut,
   Map,
-  Menu,
   Settings,
   Sparkles,
-  X,
 } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link, NavLink, Outlet, useLocation } from 'react-router'
 import { useAuth } from '@/auth/useAuth'
 import { Logo } from './Logo'
 
 const NAV = [
-  { to: '/app', label: 'Dashboard', icon: LayoutDashboard, end: true },
-  { to: '/app/fields', label: 'Fields', icon: Map },
-  { to: '/app/recommend', label: 'Recommend', icon: Sparkles },
-  { to: '/app/advisor', label: 'Crop advisor', icon: ClipboardCheck },
-  { to: '/app/crops', label: 'Crop library', icon: BookOpen },
-  { to: '/app/history', label: 'History', icon: History },
+  { to: '/app', label: 'Overview', short: 'Home', icon: LayoutGrid, end: true },
+  { to: '/app/fields', label: 'Fields', short: 'Fields', icon: Map },
+  { to: '/app/recommend', label: 'Recommend', short: 'Recommend', icon: Sparkles },
+  { to: '/app/advisor', label: 'Advisor', short: 'Advisor', icon: ClipboardCheck },
+  { to: '/app/crops', label: 'Crop library', short: 'Crops', icon: BookOpen },
 ]
 
 function initials(name: string) {
@@ -34,67 +32,80 @@ function initials(name: string) {
     .join('')
 }
 
-function Navigation({ onNavigate }: { onNavigate?: () => void }) {
+function UserMenu() {
   const { user, logout } = useAuth()
-  return (
-    <div className="flex h-full flex-col">
-      <nav className="flex-1 space-y-1 px-3" aria-label="Main">
-        {NAV.map(({ to, label, icon: Icon, end }) => (
-          <NavLink
-            key={to}
-            to={to}
-            end={end}
-            onClick={onNavigate}
-            className={({ isActive }) =>
-              clsx(
-                'flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
-                isActive
-                  ? 'bg-brand-soft text-brand-soft-fg'
-                  : 'text-fg-muted hover:bg-surface-muted hover:text-fg',
-              )
-            }
-          >
-            <Icon className="size-4.5 shrink-0" aria-hidden />
-            {label}
-          </NavLink>
-        ))}
-      </nav>
+  const [open, setOpen] = useState(false)
+  const ref = useRef<HTMLDivElement>(null)
+  const location = useLocation()
+  const [lastPath, setLastPath] = useState(location.pathname)
 
-      <div className="border-t border-line p-3">
-        <NavLink
-          to="/app/settings"
-          onClick={onNavigate}
-          className={({ isActive }) =>
-            clsx(
-              'flex items-center gap-3 rounded-lg px-3 py-2 transition-colors',
-              isActive ? 'bg-surface-muted' : 'hover:bg-surface-muted',
-            )
-          }
+  // Close when navigating (adjusting state during render, as React recommends).
+  if (lastPath !== location.pathname) {
+    setLastPath(location.pathname)
+    setOpen(false)
+  }
+
+  useEffect(() => {
+    if (!open) return
+    const onPointer = (event: PointerEvent) => {
+      if (!ref.current?.contains(event.target as Node)) setOpen(false)
+    }
+    const onKey = (event: KeyboardEvent) => event.key === 'Escape' && setOpen(false)
+    document.addEventListener('pointerdown', onPointer)
+    document.addEventListener('keydown', onKey)
+    return () => {
+      document.removeEventListener('pointerdown', onPointer)
+      document.removeEventListener('keydown', onKey)
+    }
+  }, [open])
+
+  const item =
+    'flex w-full items-center gap-3 rounded-xl px-3 py-2 text-left text-sm text-fg hover:bg-surface-muted [&_svg]:size-4 [&_svg]:text-fg-subtle'
+
+  return (
+    <div className="relative" ref={ref}>
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        aria-expanded={open}
+        aria-haspopup="menu"
+        className="flex items-center gap-2 rounded-full border border-line bg-surface py-1 pr-2.5 pl-1 hover:border-line-strong"
+      >
+        <span className="grid size-8 place-items-center rounded-full bg-highlight text-xs font-bold text-highlight-fg">
+          {user ? initials(user.full_name) : '?'}
+        </span>
+        <span className="hidden max-w-32 truncate text-sm font-medium sm:block">
+          {user?.full_name.split(' ')[0]}
+        </span>
+        <ChevronDown className="size-4 text-fg-subtle" aria-hidden />
+      </button>
+      {open && (
+        <div
+          role="menu"
+          className="absolute top-12 right-0 z-50 w-64 rounded-2xl border border-line bg-surface p-2 shadow-pop"
         >
-          <span className="grid size-8 shrink-0 place-items-center rounded-full bg-brand text-xs font-semibold text-brand-fg">
-            {user ? initials(user.full_name) : '?'}
-          </span>
-          <span className="min-w-0 flex-1">
-            <span className="block truncate text-sm font-medium text-fg">{user?.full_name}</span>
-            <span className="block truncate text-xs text-fg-subtle">{user?.email}</span>
-          </span>
-          <Settings className="size-4 shrink-0 text-fg-subtle" aria-label="Settings" />
-        </NavLink>
-        <button
-          type="button"
-          onClick={logout}
-          className="mt-1 flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-fg-muted hover:bg-surface-muted hover:text-fg"
-        >
-          <LogOut className="size-4.5" aria-hidden />
-          Sign out
-        </button>
-      </div>
+          <div className="px-3 pt-2 pb-3">
+            <p className="truncate text-sm font-semibold">{user?.full_name}</p>
+            <p className="truncate text-xs text-fg-subtle">{user?.email}</p>
+          </div>
+          <div className="border-t border-line pt-2">
+            <Link role="menuitem" to="/app/history" className={item}>
+              <History /> Recommendation history
+            </Link>
+            <Link role="menuitem" to="/app/settings" className={item}>
+              <Settings /> Settings
+            </Link>
+            <button role="menuitem" type="button" onClick={logout} className={item}>
+              <LogOut /> Sign out
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
 
 export function AppLayout() {
-  const [open, setOpen] = useState(false)
   const location = useLocation()
 
   useEffect(() => {
@@ -102,62 +113,83 @@ export function AppLayout() {
   }, [location.pathname])
 
   return (
-    <div className="min-h-dvh lg:grid lg:grid-cols-[256px_1fr]">
+    <div className="min-h-dvh pb-20 md:pb-0">
       <a
         href="#main"
-        className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-50 focus:rounded-md focus:bg-surface focus:px-3 focus:py-2"
+        className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-50 focus:rounded-full focus:bg-surface focus:px-4 focus:py-2"
       >
         Skip to content
       </a>
 
-      {/* Desktop sidebar */}
-      <aside className="sticky top-0 hidden h-dvh flex-col border-r border-line bg-surface lg:flex">
-        <Link to="/app" className="px-6 py-5">
-          <Logo />
-        </Link>
-        <Navigation />
-      </aside>
-
-      {/* Mobile top bar and drawer */}
-      <div className="sticky top-0 z-30 flex items-center justify-between border-b border-line bg-surface/95 px-4 py-3 backdrop-blur lg:hidden">
-        <Link to="/app">
-          <Logo />
-        </Link>
-        <button
-          type="button"
-          onClick={() => setOpen(true)}
-          className="rounded-md p-2 text-fg-muted hover:bg-surface-muted"
-          aria-label="Open menu"
-          aria-expanded={open}
-        >
-          <Menu className="size-5" />
-        </button>
-      </div>
-      {open && (
-        <div className="fixed inset-0 z-40 lg:hidden" role="dialog" aria-modal="true" aria-label="Menu">
-          <div className="absolute inset-0 bg-black/40" onClick={() => setOpen(false)} />
-          <div className="absolute inset-y-0 left-0 flex w-72 max-w-[85%] flex-col bg-surface shadow-pop">
-            <div className="flex items-center justify-between px-5 py-4">
-              <Logo />
-              <button
-                type="button"
-                onClick={() => setOpen(false)}
-                className="rounded-md p-2 text-fg-muted hover:bg-surface-muted"
-                aria-label="Close menu"
+      <header className="sticky top-0 z-40 border-b border-line bg-bg/85 backdrop-blur-md">
+        <div className="mx-auto flex h-16 max-w-6xl items-center gap-6 px-4 sm:px-6">
+          <Link to="/app" aria-label="AgroAI overview">
+            <Logo />
+          </Link>
+          <nav className="hidden flex-1 items-center gap-1 md:flex" aria-label="Main">
+            {NAV.map(({ to, label, end }) => (
+              <NavLink
+                key={to}
+                to={to}
+                end={end}
+                className={({ isActive }) =>
+                  clsx(
+                    'rounded-full px-3.5 py-1.5 text-sm font-medium transition-colors',
+                    isActive
+                      ? 'bg-fg text-bg'
+                      : 'text-fg-muted hover:bg-surface-muted hover:text-fg',
+                  )
+                }
               >
-                <X className="size-5" />
-              </button>
-            </div>
-            <Navigation onNavigate={() => setOpen(false)} />
+                {label}
+              </NavLink>
+            ))}
+          </nav>
+          <div className="ml-auto">
+            <UserMenu />
           </div>
         </div>
-      )}
+      </header>
 
-      <main id="main" className="min-w-0 px-4 py-6 sm:px-6 lg:px-10 lg:py-8">
-        <div className="mx-auto max-w-6xl">
-          <Outlet />
-        </div>
+      <main id="main" className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:py-10">
+        <Outlet />
       </main>
+
+      {/* Mobile tab bar */}
+      <nav
+        className="fixed inset-x-0 bottom-0 z-40 border-t border-line bg-surface/95 pb-[env(safe-area-inset-bottom)] backdrop-blur-md md:hidden"
+        aria-label="Main"
+      >
+        <div className="grid grid-cols-5">
+          {NAV.map(({ to, short, icon: Icon, end }) => (
+            <NavLink
+              key={to}
+              to={to}
+              end={end}
+              className={({ isActive }) =>
+                clsx(
+                  'flex flex-col items-center gap-1 py-2.5 text-[11px] font-semibold',
+                  isActive ? 'text-fg' : 'text-fg-subtle',
+                )
+              }
+            >
+              {({ isActive }) => (
+                <>
+                  <span
+                    className={clsx(
+                      'grid h-7 w-12 place-items-center rounded-full transition-colors',
+                      isActive && 'bg-highlight text-highlight-fg',
+                    )}
+                  >
+                    <Icon className="size-4.5" aria-hidden />
+                  </span>
+                  {short}
+                </>
+              )}
+            </NavLink>
+          ))}
+        </div>
+      </nav>
     </div>
   )
 }

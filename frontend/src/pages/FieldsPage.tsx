@@ -18,11 +18,11 @@ function FieldCard({ field }: { field: Field }) {
   return (
     <Link
       to={`/app/fields/${field.id}`}
-      className="group block rounded-xl border border-line bg-surface p-5 shadow-card transition-colors hover:border-brand/50"
+      className="group block rounded-2xl border border-line bg-surface p-5 transition-colors hover:border-fg/30"
     >
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <h3 className="truncate font-semibold group-hover:text-brand">{field.name}</h3>
+          <h3 className="truncate font-display text-lg font-medium group-hover:underline decoration-highlight decoration-2 underline-offset-4">{field.name}</h3>
           <p className="mt-0.5 flex flex-wrap gap-x-3 text-sm text-fg-subtle">
             {field.area_hectares !== null && <span>{formatNumber(field.area_hectares, 2)} ha</span>}
             {field.soil_type && <span>{field.soil_type}</span>}

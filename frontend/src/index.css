@@ -1,72 +1,94 @@
 @import 'tailwindcss';
 @import 'leaflet/dist/leaflet.css';
+@import '@fontsource-variable/manrope';
+@import '@fontsource-variable/fraunces';
 
 /*
  * Design tokens. Semantic colours are CSS variables so light and dark themes share the
  * same utility classes (bg-surface, text-fg, border-line, ...).
  */
 :root {
-  --bg: #f6f7f4;
+  /* Warm paper neutrals and ink */
+  --bg: #f6f4ee;
   --surface: #ffffff;
-  --surface-muted: #f0f2ec;
-  --line: #e2e5dc;
-  --line-strong: #cdd2c4;
-  --fg: #18201a;
-  --fg-muted: #4d574f;
-  --fg-subtle: #6b756c;
+  --surface-muted: #efece4;
+  --line: #e3dfd4;
+  --line-strong: #cfcabd;
+  --fg: #15171b;
+  --fg-muted: #4a4d53;
+  --fg-subtle: #6b6e74;
 
-  --brand: #1f6b3a;
-  --brand-hover: #18572f;
+  /* Primary actions are ink; lime is the signature highlight */
+  --primary: #15171b;
+  --primary-hover: #2b2e34;
+  --primary-fg: #ffffff;
+  --highlight: #c8f04f;
+  --highlight-fg: #15171b;
+  --ink: #15171b;
+  --ink-fg: #f6f4ee;
+
+  /* Olive for brand text, icons and progress */
+  --brand: #4b7a0e;
+  --brand-hover: #3d650a;
   --brand-fg: #ffffff;
-  --brand-soft: #e3f1e6;
-  --brand-soft-fg: #17502c;
+  --brand-soft: #eaf5cf;
+  --brand-soft-fg: #36580a;
 
-  --accent: #9a6416;
-  --accent-soft: #fbf0dc;
+  /* Terracotta secondary */
+  --accent: #b0532b;
+  --accent-soft: #f7e6dc;
 
-  --success: #1f7a45;
-  --success-soft: #e2f3e8;
-  --warning: #8a5200;
-  --warning-soft: #fdf1d8;
+  --success: #2f7d32;
+  --success-soft: #e3f2e1;
+  --warning: #8f5a00;
+  --warning-soft: #fbefd5;
   --danger: #b42318;
-  --danger-soft: #fdebe9;
-  --info: #1d5fa6;
-  --info-soft: #e5effa;
+  --danger-soft: #fceae7;
+  --info: #2457a6;
+  --info-soft: #e6eefa;
 
-  --ring: #2f8a4f;
+  --ring: #6b9a12;
   color-scheme: light;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --bg: #0f1411;
-    --surface: #161d18;
-    --surface-muted: #1d2620;
-    --line: #2a352d;
-    --line-strong: #3a473e;
-    --fg: #e8ede8;
-    --fg-muted: #b3bdb4;
-    --fg-subtle: #8d978f;
+    --bg: #0f1114;
+    --surface: #171a1e;
+    --surface-muted: #1f2328;
+    --line: #2a2e34;
+    --line-strong: #3a3f46;
+    --fg: #eceee9;
+    --fg-muted: #b5b8b3;
+    --fg-subtle: #8d918c;
 
-    --brand: #4fb871;
-    --brand-hover: #63c783;
-    --brand-fg: #0b1a10;
-    --brand-soft: #1b3324;
-    --brand-soft-fg: #a7e3b4;
+    --primary: #c8f04f;
+    --primary-hover: #d6f57a;
+    --primary-fg: #15171b;
+    --highlight: #c8f04f;
+    --highlight-fg: #15171b;
+    --ink: #1c2025;
+    --ink-fg: #eceee9;
 
-    --accent: #e0a649;
-    --accent-soft: #3a2c14;
+    --brand: #b7e04a;
+    --brand-hover: #c8f04f;
+    --brand-fg: #15171b;
+    --brand-soft: #253014;
+    --brand-soft-fg: #d4f28a;
 
-    --success: #5ccf86;
-    --success-soft: #173323;
+    --accent: #e08a62;
+    --accent-soft: #3b2418;
+
+    --success: #6fcf73;
+    --success-soft: #1a3020;
     --warning: #f0b450;
     --warning-soft: #3a2b12;
     --danger: #f2877d;
     --danger-soft: #3d1a17;
-    --info: #79b3ef;
+    --info: #86b4f0;
     --info-soft: #172a40;
 
-    --ring: #63c783;
+    --ring: #c8f04f;
     color-scheme: dark;
   }
 }
@@ -80,6 +102,13 @@
   --color-fg: var(--fg);
   --color-fg-muted: var(--fg-muted);
   --color-fg-subtle: var(--fg-subtle);
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-primary-fg: var(--primary-fg);
+  --color-highlight: var(--highlight);
+  --color-highlight-fg: var(--highlight-fg);
+  --color-ink: var(--ink);
+  --color-ink-fg: var(--ink-fg);
   --color-brand: var(--brand);
   --color-brand-hover: var(--brand-hover);
   --color-brand-fg: var(--brand-fg);
@@ -99,11 +128,10 @@
 }
 
 @theme {
-  --font-sans:
-    ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial,
-    sans-serif;
-  --shadow-card: 0 1px 2px rgb(16 24 18 / 0.05), 0 1px 3px rgb(16 24 18 / 0.04);
-  --shadow-pop: 0 12px 32px -8px rgb(16 24 18 / 0.25);
+  --font-sans: 'Manrope Variable', ui-sans-serif, system-ui, sans-serif;
+  --font-display: 'Fraunces Variable', ui-serif, Georgia, serif;
+  --shadow-card: 0 1px 2px rgb(21 23 27 / 0.04);
+  --shadow-pop: 0 18px 40px -12px rgb(21 23 27 / 0.28);
 }
 
 @layer base {
@@ -118,7 +146,13 @@
     outline-offset: 2px;
   }
   ::selection {
-    background: var(--brand-soft);
+    background: var(--highlight);
+    color: var(--highlight-fg);
+  }
+  h1,
+  h2,
+  h3 {
+    text-wrap: balance;
   }
   dialog::backdrop {
     background: rgb(10 15 12 / 0.5);
