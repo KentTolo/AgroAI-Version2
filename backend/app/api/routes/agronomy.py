@@ -45,7 +45,8 @@ def get_crop(slug: str) -> CropRead:
 @router.get("/model", response_model=ModelInfo, tags=["recommendations"])
 def model_info(recommender: Recommender) -> ModelInfo:
     """Version and evaluation metrics of the model currently serving predictions."""
-    return ModelInfo.model_validate(recommender.metadata)
+    fields = ModelInfo.model_fields.keys()
+    return ModelInfo.model_validate({k: v for k, v in recommender.metadata.items() if k in fields})
 
 
 @router.post(

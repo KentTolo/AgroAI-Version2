@@ -78,6 +78,8 @@ def test_model_info(client: TestClient) -> None:
     body = client.get("/api/v1/model").json()
     assert body["version"] == "test-model"
     assert "rice" in body["classes"]
+    assert body["dataset"]["samples"] == 2200
+    assert "environment" not in body
 
 
 def test_missing_model_returns_503(client_without_model: TestClient) -> None:

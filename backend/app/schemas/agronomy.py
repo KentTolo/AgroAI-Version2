@@ -167,6 +167,7 @@ class ModelInfo(Schema):
     trained_at: datetime
     features: list[str]
     classes: list[str]
+    dataset: dict[str, Any] = Field(default_factory=dict)
     metrics: dict[str, Any]
 
 

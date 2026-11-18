@@ -94,7 +94,11 @@ def artifacts_dir(tmp_path_factory: pytest.TempPathFactory) -> Path:
         "trained_at": "2026-01-01T00:00:00+00:00",
         "features": list(FEATURES),
         "classes": [str(c) for c in model.classes_],
-        "metrics": {"test": {"accuracy": 0.99}},
+        # Mirror every key app.ml.train writes, so schema changes are caught here.
+        "dataset": {"file": "crop_recommendation.csv", "sha256": "0" * 64, "samples": len(df)},
+        "metrics": {"test": {"accuracy": 0.99}, "cross_validation": {}},
+        "random_state": 0,
+        "environment": {"python": "3", "scikit_learn": "1"},
     }
     (directory / METADATA_FILENAME).write_text(json.dumps(metadata))
     return directory
