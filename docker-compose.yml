@@ -1,0 +1,46 @@
+# Full stack: PostgreSQL, the API and the web app.
+#   cp .env.example .env   # then set AGROAI_SECRET_KEY
+#   docker compose up --build
+# The app is then at http://localhost:8080 and the interactive API docs at http://localhost:8000/docs.
+
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: agroai
+      POSTGRES_USER: agroai
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-agroai}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U agroai -d agroai"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+
+  api:
+    build: ./backend
+    environment:
+      AGROAI_DATABASE_URL: postgresql+psycopg://agroai:${POSTGRES_PASSWORD:-agroai}@db:5432/agroai
+      AGROAI_SECRET_KEY: ${AGROAI_SECRET_KEY:?Set AGROAI_SECRET_KEY in .env (see .env.example)}
+      AGROAI_CORS_ORIGINS: ${AGROAI_CORS_ORIGINS:-http://localhost:8080}
+      AGROAI_LOG_LEVEL: ${AGROAI_LOG_LEVEL:-INFO}
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "8000:8000"
+    restart: unless-stopped
+
+  web:
+    build: ./frontend
+    depends_on:
+      api:
+        condition: service_healthy
+    ports:
+      - "8080:80"
+    restart: unless-stopped
+
+volumes:
+  pgdata:

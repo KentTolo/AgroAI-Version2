@@ -1,0 +1,78 @@
+# Architecture
+
+## Overview
+
+```
+ Browser ──► nginx (web container) ──┬── static React app (/)
+                                     └── /api, /health ──► FastAPI (api container) ──► PostgreSQL
+                                                              │
+                                                              ├── ML model (joblib artifact, loaded at startup)
+                                                              └── crop catalogue + profiles (JSON, read once)
+```
+
+- **Frontend:** React 19 + TypeScript, built by Vite and served by nginx. React Router handles
+  navigation, TanStack Query handles server state and caching, react-hook-form + Zod handle form
+  validation, Leaflet draws maps and Recharts draws charts. Styling is Tailwind CSS with semantic
+  colour tokens, and light and dark themes follow the operating-system setting.
+- **Backend:** FastAPI on Python 3.12+, SQLAlchemy 2 (synchronous), Alembic migrations,
+  Pydantic v2 settings and schemas.
+- **Same-origin deployment.** nginx proxies `/api` to the backend, so production needs no CORS
+  and the bearer token never crosses origins. In development, Vite's proxy does the same.
+
+## Backend layers
+
+| Layer | Location | Responsibility |
+|---|---|---|
+| Routes | `app/api/routes/` | HTTP concerns: parsing, auth, status codes, ownership checks |
+| Presenters | `app/api/presenters.py` | Turn ORM rows and service results into response schemas |
+| Services | `app/services/` | Domain logic with no HTTP or database knowledge: advisory engine, growth stages, simulator, crop catalogue |
+| ML | `app/ml/` | Feature definitions (single source of truth), dataset validation, training, prediction |
+| Persistence | `app/models/`, `app/db/` | SQLAlchemy models, UTC-safe timestamps, session factory |
+
+Services are pure functions over plain data, so they are unit-tested without a database or HTTP
+client.
+
+## Data model
+
+```
+users 1──* fields 1──* sensor_readings
+  │           │
+  │           └──* crop_cycles
+  └──* recommendations *──0..1 fields   (SET NULL when a field is deleted)
+```
+
+- All primary keys are UUIDs; all timestamps are timezone-aware UTC.
+- Deleting a user cascades to everything they own; deleting a field keeps its recommendations
+  in history.
+- `sensor_readings (field_id, recorded_at)` and `recommendations (user_id, created_at)` are indexed
+  for the app's main time-ordered queries.
+- Check constraints guard coordinates, areas, yields and harvest dates at the database level as
+  well as in the API.
+
+## Security
+
+- Passwords are hashed with bcrypt. Login takes the same time for unknown emails as for wrong
+  passwords, and returns an identical error, so accounts can't be enumerated.
+- Stateless JWT access tokens (HS256, 60-minute default) carry only the user ID. The API refuses to
+  start in production with the default or a short secret.
+- Every resource lookup checks ownership and returns 404, not 403, for other users' data, so IDs
+  can't be probed.
+- Request bodies reject unknown fields. Numeric inputs are range-checked.
+- nginx sets a strict Content-Security-Policy, `X-Frame-Options: DENY`, `nosniff` and a referrer
+  policy. Containers run as non-root users.
+
+## Observability
+
+Every response carries an `X-Request-ID` (propagated from nginx or generated) and is logged with
+method, path, status and latency. `/health` is a liveness probe; `/health/ready` checks the
+database and model and returns 503 when either is unavailable.
+
+## Key decisions
+
+| Decision | Rationale |
+|---|---|
+| Model trained at image build, not committed | Keeps binaries out of git; every image ships a reproducible artifact whose version is recorded on each prediction. |
+| Rule-based advisory derived from data | The original project's hand-picked single "ideal" values (and a ±5 mm rainfall tolerance) were replaced by per-crop percentile bands computed from the dataset, so advice is consistent with what the model learned. |
+| Latitude/longitude columns instead of PostGIS | The app only needs points; plain columns keep deployment simple. PostGIS can be added when boundary polygons are needed. |
+| Synchronous SQLAlchemy | Request handlers are short and CPU-light; sync code is simpler to reason about and FastAPI runs it in a thread pool. |
+| Simulated sensors behind the same readings API | Real IoT devices can post to `POST /fields/{id}/readings` with `source=device` later, with no other changes. |
