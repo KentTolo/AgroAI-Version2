@@ -1,6 +1,7 @@
 import { ArrowRight, ArrowUpRight, Check } from 'lucide-react'
 import { Link } from 'react-router'
 import { useAuth } from '@/auth/useAuth'
+import { DEMO_MODE } from '@/lib/api'
 import { Logo } from '@/components/Logo'
 import { Topography } from '@/components/Topography'
 import { ButtonLink } from '@/components/ui/Button'
@@ -153,9 +154,15 @@ export function LandingPage() {
               <ButtonLink to={startHref} size="lg" icon={<ArrowRight />}>
                 {user ? 'Go to your farm' : 'Start for free'}
               </ButtonLink>
-              <a href="#how" className="inline-flex h-12 items-center px-3 text-sm font-semibold text-fg-muted hover:text-fg">
-                See how it works
-              </a>
+              {DEMO_MODE && !user ? (
+                <ButtonLink to="/login" size="lg" variant="secondary">
+                  Try the live demo
+                </ButtonLink>
+              ) : (
+                <a href="#how" className="inline-flex h-12 items-center px-3 text-sm font-semibold text-fg-muted hover:text-fg">
+                  See how it works
+                </a>
+              )}
             </div>
             <ul className="mt-10 flex flex-wrap gap-x-6 gap-y-2 text-sm text-fg-muted">
               {['No hardware needed', 'Works on any phone', 'Your data stays yours'].map((t) => (

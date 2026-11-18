@@ -2,7 +2,7 @@
 BACKEND := cd backend &&
 FRONTEND := cd frontend &&
 
-.PHONY: help install train migrate seed api web dev test lint format check up down
+.PHONY: help install train migrate seed api web dev test lint format check up down demo-assets demo
 
 help: ## Show this help
 	@grep -E '^[a-z-]+:.*## ' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*## "}; {printf "  \033[32m%-10s\033[0m %s\n", $$1, $$2}'
@@ -45,3 +45,9 @@ up: ## Build and start the full stack with Docker Compose
 
 down: ## Stop the Docker Compose stack
 	docker compose down
+
+demo-assets: ## Export the model and rules used by the browser-only demo
+	$(BACKEND) uv run python -m app.ml.export --out ../frontend/public/demo
+
+demo: demo-assets ## Run the browser-only (GitHub Pages) demo on http://localhost:5173
+	$(FRONTEND) VITE_DEMO_MODE=true npm run dev

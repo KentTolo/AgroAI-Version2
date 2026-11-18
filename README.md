@@ -6,6 +6,9 @@ AgroAI turns a soil test and local weather into planting decisions. It ranks the
 to thrive on a field, explains which conditions fall short for a chosen crop and what to do about
 each one, and tracks every planting from sowing to harvest.
 
+**Live demo: https://kenttolo.github.io/AgroAI-Version2/** (runs entirely in your browser; choose
+"Use the demo account" to explore a ready-made farm)
+
 ![Dashboard](docs/images/dashboard.webp)
 
 ## Features
@@ -67,6 +70,17 @@ make web                          # http://localhost:5173 (terminal 2)
 The development web server proxies `/api` to the backend, so no CORS setup is needed.
 Run `make help` for every task.
 
+### Browser-only demo (GitHub Pages)
+
+The [Pages workflow](.github/workflows/pages.yml) publishes a static build of the web app on every
+push to `main`. With no server available, the demo answers API requests inside the browser
+([`frontend/src/demo`](frontend/src/demo)): the trained Random Forest is exported to JSON and
+evaluated in JavaScript (the backend tests check that its predictions match scikit-learn
+exactly), and the advisory, growth and simulator rules are exported from the Python services.
+Each visitor's data lives in their own browser's storage.
+
+Run the same build locally with `make demo`.
+
 ## Project layout
 
 ```
@@ -78,6 +92,7 @@ backend/            FastAPI service (Python)
   app/data/         Crop metadata and data-derived condition profiles
   alembic/          Database migrations        tests/         pytest suite
 frontend/           React + TypeScript single-page app (Vite, Tailwind CSS)
+  src/demo/         In-browser API used by the GitHub Pages demo
   src/pages/        Screens                    src/components/  UI kit and domain components
   src/lib/          API client, React Query hooks, formatting
 docs/               Architecture, model card and API reference

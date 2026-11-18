@@ -42,6 +42,11 @@ class CropRecommender:
                 "Model was trained on different features than this API expects; retrain it."
             )
 
+    @property
+    def estimator(self) -> Any:
+        """The underlying scikit-learn estimator."""
+        return self._estimator
+
     @classmethod
     def load(cls, artifacts_dir: Path) -> CropRecommender:
         model_path = artifacts_dir / MODEL_FILENAME

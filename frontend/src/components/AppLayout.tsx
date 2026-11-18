@@ -13,6 +13,8 @@ import {
 import { useEffect, useRef, useState } from 'react'
 import { Link, NavLink, Outlet, useLocation } from 'react-router'
 import { useAuth } from '@/auth/useAuth'
+import { DEMO_MODE } from '@/lib/api'
+import { DemoBanner } from './DemoBanner'
 import { Logo } from './Logo'
 
 const NAV = [
@@ -121,6 +123,7 @@ export function AppLayout() {
         Skip to content
       </a>
 
+      {DEMO_MODE && <DemoBanner />}
       <header className="sticky top-0 z-40 border-b border-line bg-bg/85 backdrop-blur-md">
         <div className="mx-auto flex h-16 max-w-6xl items-center gap-6 px-4 sm:px-6">
           <Link to="/app" aria-label="AgroAI overview">

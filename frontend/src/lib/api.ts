@@ -18,6 +18,9 @@ import type {
 } from './types'
 
 const BASE_URL = (import.meta.env.VITE_API_URL as string | undefined) ?? '/api/v1'
+
+/** The GitHub Pages build has no server: requests are answered in the browser instead. */
+export const DEMO_MODE = import.meta.env.VITE_DEMO_MODE === 'true'
 const TOKEN_KEY = 'agroai.token'
 
 export class ApiError extends Error {
@@ -93,6 +96,16 @@ async function request<T>(path: string, options: RequestOptions = {}): Promise<T
   const headers: Record<string, string> = { Accept: 'application/json' }
   const token = tokenStore.get()
   if (token) headers.Authorization = `Bearer ${token}`
+
+  if (DEMO_MODE) {
+    const { handleDemoRequest } = await import('@/demo/server')
+    try {
+      return (await handleDemoRequest({ method, path, token, body, form, query })) as T
+    } catch (err) {
+      if (err instanceof ApiError && err.status === 401 && token) onUnauthorized?.()
+      throw err
+    }
+  }
 
   let payload: BodyInit | undefined
   if (form) {

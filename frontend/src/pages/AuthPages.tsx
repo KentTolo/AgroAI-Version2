@@ -5,6 +5,8 @@ import { useForm } from 'react-hook-form'
 import { Link, useLocation, useNavigate } from 'react-router'
 import { z } from 'zod'
 import { useAuth } from '@/auth/useAuth'
+import { DEMO_MODE } from '@/lib/api'
+import { DEMO_EMAIL, DEMO_PASSWORD } from '@/demo/credentials'
 import { Logo } from '@/components/Logo'
 import { Topography } from '@/components/Topography'
 import { Button } from '@/components/ui/Button'
@@ -64,20 +66,23 @@ export function LoginPage() {
   const navigate = useNavigate()
   const location = useLocation()
   const [error, setError] = useState<string | null>(null)
+  const [demoLoading, setDemoLoading] = useState(false)
   const {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
   } = useForm<LoginValues>({ resolver: zodResolver(loginSchema) })
 
-  const onSubmit = async (values: LoginValues) => {
+  const onSubmit = async (values: LoginValues, setBusy?: (busy: boolean) => void) => {
     setError(null)
+    setBusy?.(true)
     try {
       await login(values.email, values.password)
       const from = (location.state as { from?: string } | null)?.from
       navigate(from && from.startsWith('/app') ? from : '/app', { replace: true })
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Sign in failed')
+      setBusy?.(false)
     }
   }
 
@@ -93,7 +98,24 @@ export function LoginPage() {
         </>
       }
     >
-      <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-4">
+      {DEMO_MODE && (
+        <div className="mb-8 rounded-2xl border border-line bg-surface p-4">
+          <p className="text-sm font-semibold">Exploring the live demo?</p>
+          <p className="mt-1 text-sm text-fg-muted">
+            Sign in to a ready-made farm with fields, sensor history and plantings. Everything stays
+            in this browser.
+          </p>
+          <Button
+            className="mt-3"
+            variant="secondary"
+            loading={demoLoading}
+            onClick={() => void onSubmit({ email: DEMO_EMAIL, password: DEMO_PASSWORD }, setDemoLoading)}
+          >
+            Use the demo account
+          </Button>
+        </div>
+      )}
+      <form onSubmit={handleSubmit((v) => onSubmit(v))} noValidate className="space-y-4">
         {error && <Alert tone="danger">{error}</Alert>}
         <FormField label="Email" error={errors.email?.message}>
           {({ id, invalid }) => (

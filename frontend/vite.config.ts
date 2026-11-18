@@ -7,6 +7,8 @@ import { defineConfig } from 'vite'
 const apiTarget = process.env.VITE_DEV_API_PROXY ?? 'http://localhost:8000'
 
 export default defineConfig({
+  // GitHub Pages serves the demo from /<repository>/, set via VITE_BASE in the workflow.
+  base: process.env.VITE_BASE ?? '/',
   plugins: [react(), tailwindcss()],
   resolve: {
     alias: { '@': fileURLToPath(new URL('./src', import.meta.url)) },
