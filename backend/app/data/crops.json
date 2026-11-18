@@ -1,0 +1,27 @@
+{
+  "_note": "Durations are typical values for planning only; they vary with variety, altitude and season. Confirm with a local extension officer.",
+  "crops": [
+    {"slug": "apple", "name": "Apple", "category": "fruit", "lifecycle": "perennial", "days_to_harvest": 1095, "description": "Temperate tree fruit that needs winter chilling. First crop typically 3 years after planting grafted trees."},
+    {"slug": "banana", "name": "Banana", "category": "fruit", "lifecycle": "perennial", "days_to_harvest": 300, "description": "Frost-sensitive herbaceous perennial that needs warmth and steady moisture. First bunch about 9 to 12 months after planting."},
+    {"slug": "blackgram", "name": "Black gram", "category": "legume", "lifecycle": "annual", "days_to_harvest": 90, "description": "Short-season pulse that fixes nitrogen and tolerates moderate drought."},
+    {"slug": "chickpea", "name": "Chickpea", "category": "legume", "lifecycle": "annual", "days_to_harvest": 100, "description": "Cool-season pulse suited to drier conditions and residual soil moisture."},
+    {"slug": "coconut", "name": "Coconut", "category": "plantation", "lifecycle": "perennial", "days_to_harvest": 2190, "description": "Tropical palm needing high humidity and warmth. Starts bearing after about 6 years."},
+    {"slug": "coffee", "name": "Coffee", "category": "plantation", "lifecycle": "perennial", "days_to_harvest": 1095, "description": "Shade-tolerant tropical shrub. First harvest roughly 3 years after planting."},
+    {"slug": "cotton", "name": "Cotton", "category": "fibre", "lifecycle": "annual", "days_to_harvest": 160, "description": "Warm-season fibre crop with a long growing period and high potassium demand."},
+    {"slug": "grapes", "name": "Grapes", "category": "fruit", "lifecycle": "perennial", "days_to_harvest": 1095, "description": "Vine fruit that prefers warm, dry summers. Meaningful yields from about the third year."},
+    {"slug": "jute", "name": "Jute", "category": "fibre", "lifecycle": "annual", "days_to_harvest": 120, "description": "Fibre crop of warm, humid, high-rainfall areas."},
+    {"slug": "kidneybeans", "name": "Kidney beans", "category": "legume", "lifecycle": "annual", "days_to_harvest": 90, "description": "Common bean grown for dry grain. Sensitive to frost and waterlogging."},
+    {"slug": "lentil", "name": "Lentil", "category": "legume", "lifecycle": "annual", "days_to_harvest": 110, "description": "Cool-season pulse that tolerates drought and poorer soils."},
+    {"slug": "maize", "name": "Maize", "category": "cereal", "lifecycle": "annual", "days_to_harvest": 120, "description": "Staple cereal. Needs good nitrogen supply and moisture around flowering."},
+    {"slug": "mango", "name": "Mango", "category": "fruit", "lifecycle": "perennial", "days_to_harvest": 1460, "description": "Tropical tree fruit needing a warm, frost-free climate. Grafted trees bear after 3 to 5 years."},
+    {"slug": "mothbeans", "name": "Moth beans", "category": "legume", "lifecycle": "annual", "days_to_harvest": 75, "description": "Very drought-hardy pulse for hot, dry conditions."},
+    {"slug": "mungbean", "name": "Mung bean", "category": "legume", "lifecycle": "annual", "days_to_harvest": 65, "description": "Fast-maturing warm-season pulse, useful as a catch crop."},
+    {"slug": "muskmelon", "name": "Muskmelon", "category": "fruit", "lifecycle": "annual", "days_to_harvest": 85, "description": "Warm-season vine fruit that prefers dry weather during ripening."},
+    {"slug": "orange", "name": "Orange", "category": "fruit", "lifecycle": "perennial", "days_to_harvest": 1095, "description": "Citrus tree for frost-free, warm sites. Grafted trees bear after about 3 years."},
+    {"slug": "papaya", "name": "Papaya", "category": "fruit", "lifecycle": "perennial", "days_to_harvest": 300, "description": "Fast-growing tropical fruit. First fruit about 9 to 11 months after transplanting."},
+    {"slug": "pigeonpeas", "name": "Pigeon peas", "category": "legume", "lifecycle": "annual", "days_to_harvest": 150, "description": "Deep-rooted, drought-tolerant pulse that improves soil fertility."},
+    {"slug": "pomegranate", "name": "Pomegranate", "category": "fruit", "lifecycle": "perennial", "days_to_harvest": 730, "description": "Drought-tolerant shrub fruit for hot, dry summers. Starts bearing in about 2 years."},
+    {"slug": "rice", "name": "Rice", "category": "cereal", "lifecycle": "annual", "days_to_harvest": 120, "description": "Cereal that needs abundant water, warmth and high humidity."},
+    {"slug": "watermelon", "name": "Watermelon", "category": "fruit", "lifecycle": "annual", "days_to_harvest": 85, "description": "Warm-season vine fruit that needs sun, warmth and well-drained soil."}
+  ]
+}
