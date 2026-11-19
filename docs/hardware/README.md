@@ -1,5 +1,8 @@
 # AgroAI sensor station: build and installation manual
 
+> A printable Word version of this manual, including the field-installation chapter, is in
+> [AgroAI-Sensor-Station-Manual.docx](AgroAI-Sensor-Station-Manual.docx).
+
 A low-cost, solar-powered station that measures your field's air and soil every 15 minutes and
 sends the readings to AgroAI over Wi-Fi. Budget: **under M1,000** (Maloti and Rand are at par).
 
