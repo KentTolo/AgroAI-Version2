@@ -236,3 +236,40 @@ export interface WeatherSyncResult {
   start: string | null
   end: string | null
 }
+
+export interface Telemetry {
+  id: string
+  device_id: string
+  recorded_at: string
+  air_temperature: number | null
+  air_humidity: number | null
+  soil_moisture: number | null
+  soil_temperature: number | null
+  battery_voltage: number | null
+  signal_strength: number | null
+}
+
+export interface Device {
+  id: string
+  field_id: string
+  name: string
+  key_prefix: string
+  created_at: string
+  last_seen_at: string | null
+  latest: Telemetry | null
+}
+
+export interface DeviceWithKey extends Device {
+  api_key: string
+}
+
+export interface SensorSummary {
+  days: number
+  readings: number
+  start: string | null
+  end: string | null
+  air_temperature: number | null
+  air_humidity: number | null
+  soil_moisture: number | null
+  soil_temperature: number | null
+}

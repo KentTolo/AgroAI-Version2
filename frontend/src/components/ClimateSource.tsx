@@ -1,14 +1,14 @@
 import { CloudSun } from 'lucide-react'
 import { useEffect, useEffectEvent, useState } from 'react'
 import { formatDate, formatNumber } from '@/lib/format'
-import { useClimate, useSyncWeather } from '@/lib/queries'
+import { useClimate, useDevices, useSensorSummary, useSyncWeather } from '@/lib/queries'
 import type { Climate, Field, GrowingConditions } from '@/lib/types'
 import { Button } from './ui/Button'
 import { FormField, Select } from './ui/Form'
 
 const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
 
-type Source = 'entered' | 'recent30' | 'recent90' | 'season'
+type Source = 'entered' | 'sensor7' | 'recent30' | 'recent90' | 'season'
 
 export interface ClimateChoice {
   patch: Partial<GrowingConditions>
@@ -47,11 +47,24 @@ export function ClimateSource({
   const [source, setSource] = useState<Source>('entered')
   const [startMonth, setStartMonth] = useState(() => ((new Date().getMonth() + 1) % 12) + 1)
   const [months, setMonths] = useState(4)
-  const usesWeather = source !== 'entered'
+  const usesWeather = source !== 'entered' && source !== 'sensor7'
   const climate = useClimate(field.id, source === 'season' ? { start: startMonth, months } : undefined, usesWeather)
   const sync = useSyncWeather(field.id)
+  const devices = useDevices(field.id)
+  const hasSensors = (devices.data?.length ?? 0) > 0
+  const sensors = useSensorSummary(field.id, 7, source === 'sensor7')
 
-  const choice = usesWeather && climate.data ? choose(climate.data, source) : null
+  const sensorChoice: ClimateChoice | null =
+    source === 'sensor7' && sensors.data && sensors.data.readings > 0 && sensors.data.air_temperature !== null
+      ? {
+          patch: {
+            temperature: sensors.data.air_temperature,
+            ...(sensors.data.air_humidity !== null && { humidity: sensors.data.air_humidity }),
+          },
+          basis: `Field sensor averages over the last 7 days (${sensors.data.readings} readings); rainfall as entered`,
+        }
+      : null
+  const choice = source === 'sensor7' ? sensorChoice : usesWeather && climate.data ? choose(climate.data, source) : null
   // Notify the parent only when the resulting climate actually changes.
   const choiceKey = choice ? JSON.stringify(choice) : 'none'
   const notify = useEffectEvent(() => onChange(choice))
@@ -71,6 +84,7 @@ export function ClimateSource({
         {({ id }) => (
           <Select id={id} value={source} onChange={(e) => setSource(e.target.value as Source)}>
             <option value="entered">Values below (reading or typed)</option>
+            {hasSensors && <option value="sensor7">Field sensor: last 7 days</option>}
             <option value="recent30">Weather: last 30 days</option>
             <option value="recent90">Weather: last 90 days</option>
             <option value="season">Weather: typical climate for a season</option>
@@ -103,6 +117,18 @@ export function ClimateSource({
             )}
           </FormField>
         </div>
+      )}
+
+      {source === 'sensor7' && (
+        <p className="mt-3 text-sm text-fg-muted">
+          {sensors.isPending
+            ? 'Loading sensor readings…'
+            : sensorChoice
+              ? `${formatNumber(sensorChoice.patch.temperature ?? 0)}°C${
+                  sensorChoice.patch.humidity !== undefined ? ` · ${formatNumber(sensorChoice.patch.humidity, 0)}%` : ''
+                } from your station filled in below. Rainfall and soil values are unchanged.`
+              : 'No air temperature readings from this field in the last 7 days.'}
+        </p>
       )}
 
       {usesWeather && (

@@ -2,6 +2,10 @@
 
 import type {
   Advisory,
+  Device,
+  DeviceWithKey,
+  SensorSummary,
+  Telemetry,
   Climate,
   DailyWeather,
   WeatherSyncResult,
@@ -24,6 +28,11 @@ const BASE_URL = (import.meta.env.VITE_API_URL as string | undefined) ?? '/api/v
 
 /** The GitHub Pages build has no server: requests are answered in the browser instead. */
 export const DEMO_MODE = import.meta.env.VITE_DEMO_MODE === 'true'
+
+/** Absolute API base URL, for configuring sensor firmware. */
+export function apiBaseUrl(): string {
+  return new URL(BASE_URL, window.location.origin).toString().replace(/\/$/, '')
+}
 const TOKEN_KEY = 'agroai.token'
 
 export class ApiError extends Error {
@@ -234,6 +243,16 @@ export const api = {
     request<Climate>(`/fields/${fieldId}/weather/climate`, {
       query: { season_start: season?.start, season_months: season?.months },
     }),
+
+  devices: (fieldId: string) => request<Device[]>(`/fields/${fieldId}/devices`),
+  registerDevice: (fieldId: string, name: string) =>
+    request<DeviceWithKey>(`/fields/${fieldId}/devices`, { method: 'POST', body: { name } }),
+  rotateDeviceKey: (id: string) => request<DeviceWithKey>(`/devices/${id}/rotate-key`, { method: 'POST' }),
+  deleteDevice: (id: string) => request<void>(`/devices/${id}`, { method: 'DELETE' }),
+  telemetry: (fieldId: string, since?: string) =>
+    request<Telemetry[]>(`/fields/${fieldId}/telemetry`, { query: { since } }),
+  telemetrySummary: (fieldId: string, days = 7) =>
+    request<SensorSummary>(`/fields/${fieldId}/telemetry/summary`, { query: { days } }),
 
   crops: () => request<Crop[]>('/crops'),
   crop: (slug: string) => request<Crop>(`/crops/${slug}`),

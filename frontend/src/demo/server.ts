@@ -633,6 +633,16 @@ export async function handleDemoRequest({ method, path, token, body, form, query
       }
     }
 
+    case 'GET /fields/:id/devices':
+    case 'GET /fields/:id/telemetry':
+      ownedField(id)
+      return []
+    case 'GET /fields/:id/telemetry/summary':
+      ownedField(id)
+      return { days: 7, readings: 0, start: null, end: null, air_temperature: null, air_humidity: null, soil_moisture: null, soil_temperature: null }
+    case 'POST /fields/:id/devices':
+      return fail(501, 'Sensor stations need the full AgroAI server and are not available in the browser demo.')
+
     case 'POST /advisory': {
       const crop = findCrop(String(input.crop ?? '')) ?? fail(404, `Unknown crop '${String(input.crop)}'`)
       const conditions = pickConditions(input.conditions as Record<string, unknown>, keys)

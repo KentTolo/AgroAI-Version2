@@ -17,6 +17,7 @@ import { FieldForm } from '@/components/FieldForm'
 import { FieldMap } from '@/components/FieldMap'
 import { toMapPoints } from '@/lib/map'
 import { ReadingsChart } from '@/components/ReadingsChart'
+import { SensorsSection } from '@/components/SensorsSection'
 import { WeatherSection } from '@/components/WeatherSection'
 import { ConditionTiles } from '@/components/Results'
 import { confidenceLabel } from '@/lib/labels'
@@ -433,6 +434,7 @@ export default function FieldDetailPage() {
 
       <div className="space-y-8">
         <WeatherSection field={f} />
+        <SensorsSection field={f} />
         <ReadingsSection field={f} />
         <CyclesSection field={f} />
         <div className="grid gap-6 lg:grid-cols-2">

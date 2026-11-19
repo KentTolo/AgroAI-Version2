@@ -172,3 +172,45 @@ export function useSyncWeather(fieldId: string) {
     onSuccess: () => client.invalidateQueries({ queryKey: keys.weather(fieldId) }),
   })
 }
+
+/* ---------- Sensors ---------- */
+
+export const sensorKeys = (fieldId: string) => ['sensors', fieldId] as const
+
+export const useDevices = (fieldId: string) =>
+  useQuery({ queryKey: [...sensorKeys(fieldId), 'devices'], queryFn: () => api.devices(fieldId), refetchInterval: 60_000 })
+
+export const useTelemetry = (fieldId: string, since: string, enabled = true) =>
+  useQuery({
+    queryKey: [...sensorKeys(fieldId), 'telemetry', since],
+    queryFn: () => api.telemetry(fieldId, since),
+    enabled,
+    refetchInterval: 60_000,
+  })
+
+export const useSensorSummary = (fieldId: string, days: number, enabled = true) =>
+  useQuery({
+    queryKey: [...sensorKeys(fieldId), 'summary', days],
+    queryFn: () => api.telemetrySummary(fieldId, days),
+    enabled,
+  })
+
+function useInvalidateSensors(fieldId: string) {
+  const client = useQueryClient()
+  return () => client.invalidateQueries({ queryKey: sensorKeys(fieldId) })
+}
+
+export function useRegisterDevice(fieldId: string) {
+  const invalidate = useInvalidateSensors(fieldId)
+  return useMutation({ mutationFn: (name: string) => api.registerDevice(fieldId, name), onSuccess: invalidate })
+}
+
+export function useRotateDeviceKey(fieldId: string) {
+  const invalidate = useInvalidateSensors(fieldId)
+  return useMutation({ mutationFn: (id: string) => api.rotateDeviceKey(id), onSuccess: invalidate })
+}
+
+export function useDeleteDevice(fieldId: string) {
+  const invalidate = useInvalidateSensors(fieldId)
+  return useMutation({ mutationFn: (id: string) => api.deleteDevice(id), onSuccess: invalidate })
+}

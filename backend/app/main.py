@@ -11,7 +11,17 @@ from contextlib import asynccontextmanager
 from fastapi import APIRouter, FastAPI, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.api.routes import agronomy, auth, cycles, dashboard, fields, health, users, weather
+from app.api.routes import (
+    agronomy,
+    auth,
+    cycles,
+    dashboard,
+    devices,
+    fields,
+    health,
+    users,
+    weather,
+)
 from app.core.config import Settings, get_settings
 from app.core.logging import configure_logging
 from app.ml.predictor import CropRecommender, ModelNotAvailableError
@@ -85,7 +95,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         return response
 
     api = APIRouter(prefix=settings.api_v1_prefix)
-    for module in (auth, users, fields, weather, cycles, agronomy, dashboard):
+    for module in (auth, users, fields, weather, devices, cycles, agronomy, dashboard):
         api.include_router(module.router)
     app.include_router(api)
     app.include_router(health.router)
