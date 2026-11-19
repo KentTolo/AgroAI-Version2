@@ -44,6 +44,51 @@ function savedBasemap(fallback: Basemap): Basemap {
   }
 }
 
+/** Moves the map to show every point: one point close up, several fitted together. */
+function frame(map: MapLibreMap, points: MapPoint[], animate: boolean) {
+  if (points.length === 0) return
+  const duration = animate ? 600 : 0
+  if (points.length === 1) {
+    const [p] = points
+    if (p) map.easeTo({ center: [p.longitude, p.latitude], zoom: 14, duration })
+    return
+  }
+  const bounds = new maplibregl.LngLatBounds()
+  for (const p of points) bounds.extend([p.longitude, p.latitude])
+  map.fitBounds(bounds, { padding: 40, maxZoom: 15, duration })
+}
+
+/** A map button that brings every field back into view. */
+class FitControl implements maplibregl.IControl {
+  private container: HTMLDivElement | null = null
+  private readonly onFit: () => void
+  constructor(onFit: () => void) {
+    this.onFit = onFit
+  }
+  onAdd() {
+    const container = document.createElement('div')
+    container.className = 'maplibregl-ctrl maplibregl-ctrl-group'
+    const button = document.createElement('button')
+    button.type = 'button'
+    button.title = 'Show all fields'
+    button.setAttribute('aria-label', 'Show all fields')
+    button.innerHTML =
+      '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin:auto" aria-hidden="true"><path d="M8 3H5a2 2 0 0 0-2 2v3M21 8V5a2 2 0 0 0-2-2h-3M3 16v3a2 2 0 0 0 2 2h3M16 21h3a2 2 0 0 0 2-2v-3"/><circle cx="12" cy="12" r="2.5"/></svg>'
+    button.addEventListener('click', this.onFit)
+    container.appendChild(button)
+    this.container = container
+    return container
+  }
+  onRemove() {
+    this.container?.remove()
+    this.container = null
+  }
+}
+
+// After the page itself scrolled this recently, a wheel over the map keeps scrolling the page
+// instead of zooming, so scrolling past a map never gets "stuck" on it.
+const PAGE_SCROLL_GRACE_MS = 600
+
 function markerElement(point: MapPoint, clickable: boolean): HTMLElement {
   const el = document.createElement(clickable ? 'button' : 'span')
   el.className = 'agro-marker'
@@ -58,6 +103,8 @@ export default function FieldMapCanvas({ points, className, onSelect, onPick, zo
   const markersRef = useRef<maplibregl.Marker[]>([])
   const handlers = useRef({ onSelect, onPick })
   handlers.current = { onSelect, onPick }
+  const pointsRef = useRef(points)
+  pointsRef.current = points
   const [basemap, setBasemap] = useState<Basemap>(() => savedBasemap(onPick ? 'satellite' : 'map'))
   const [failed, setFailed] = useState(false)
 
@@ -66,6 +113,9 @@ export default function FieldMapCanvas({ points, className, onSelect, onPick, zo
     const container = containerRef.current
     if (!container) return
     const first = points[0]
+    // Touch screens: one finger scrolls the page and two fingers move the map (as in most
+    // embedded maps). In the location picker the map is the whole point, so one finger moves it.
+    const touch = window.matchMedia?.('(pointer: coarse)').matches ?? false
     let map: MapLibreMap
     try {
       map = new maplibregl.Map({
@@ -74,7 +124,7 @@ export default function FieldMapCanvas({ points, className, onSelect, onPick, zo
         center: first ? [first.longitude, first.latitude] : [DEFAULT_CENTER[1], DEFAULT_CENTER[0]],
         zoom,
         maxZoom: 19,
-        cooperativeGestures: true,
+        cooperativeGestures: touch && !onPick,
         attributionControl: { compact: true },
       })
     } catch {
@@ -83,6 +133,8 @@ export default function FieldMapCanvas({ points, className, onSelect, onPick, zo
       return
     }
     map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'top-left')
+    map.scrollZoom.setWheelZoomRate(1 / 300) // a notch of the wheel zooms a little faster
+    if (!onPick) map.addControl(new FitControl(() => frame(map, pointsRef.current, true)), 'top-left')
     if (handlers.current.onPick) {
       const locate = new maplibregl.GeolocateControl({ positionOptions: { enableHighAccuracy: true }, trackUserLocation: false })
       locate.on('geolocate', (event: GeolocationPosition) => {
@@ -93,11 +145,30 @@ export default function FieldMapCanvas({ points, className, onSelect, onPick, zo
     map.on('click', (event) => {
       handlers.current.onPick?.(Number(event.lngLat.lat.toFixed(5)), Number(event.lngLat.lng.toFixed(5)))
     })
+    // Desktop: the mouse wheel zooms the map directly (no Ctrl key), unless the page was just
+    // scrolling, in which case the page keeps scrolling past the map.
+    let lastPageScroll = 0
+    const onPageScroll = () => {
+      lastPageScroll = performance.now()
+    }
+    const onWheel = (event: WheelEvent) => {
+      if (event.ctrlKey) return // trackpad pinch: always zoom
+      if (performance.now() - lastPageScroll < PAGE_SCROLL_GRACE_MS) event.stopPropagation()
+    }
+    const guardWheel = !touch && !onPick
+    if (guardWheel) {
+      window.addEventListener('scroll', onPageScroll, { passive: true, capture: true })
+      container.addEventListener('wheel', onWheel, { capture: true })
+    }
     // Maps in dialogs and collapsible cards change size without a window resize.
     const observer = new ResizeObserver(() => map.resize())
     observer.observe(container)
     mapRef.current = map
     return () => {
+      if (guardWheel) {
+        window.removeEventListener('scroll', onPageScroll, { capture: true })
+        container.removeEventListener('wheel', onWheel, { capture: true })
+      }
       observer.disconnect()
       markersRef.current = []
       mapRef.current = null
@@ -148,14 +219,7 @@ export default function FieldMapCanvas({ points, className, onSelect, onPick, zo
       }
       return
     }
-    if (points.length === 1) {
-      const [p] = points
-      if (p) map.jumpTo({ center: [p.longitude, p.latitude], zoom: 14 })
-      return
-    }
-    const bounds = new maplibregl.LngLatBounds()
-    for (const p of points) bounds.extend([p.longitude, p.latitude])
-    map.fitBounds(bounds, { padding: 40, maxZoom: 15, duration: 0 })
+    frame(map, points, false)
   }, [points, onPick])
 
   if (failed) {
