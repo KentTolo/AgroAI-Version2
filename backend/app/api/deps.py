@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import uuid
+from functools import lru_cache
 from typing import Annotated
 
 import jwt
@@ -15,6 +16,7 @@ from app.core.security import decode_access_token
 from app.db.session import get_db
 from app.ml.predictor import CropRecommender
 from app.models import Field, User
+from app.services.weather import OpenMeteoClient, WeatherClient
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl=f"{get_settings().api_v1_prefix}/auth/login")
 
@@ -70,3 +72,17 @@ def get_optional_recommender(request: Request) -> CropRecommender | None:
 
 
 OptionalRecommender = Annotated[CropRecommender | None, Depends(get_optional_recommender)]
+
+
+@lru_cache
+def get_weather_client() -> WeatherClient:
+    settings = get_settings()
+    return OpenMeteoClient(
+        settings.weather_forecast_url,
+        settings.weather_archive_url,
+        settings.weather_timeout_seconds,
+        settings.weather_api_key.get_secret_value() if settings.weather_api_key else None,
+    )
+
+
+Weather = Annotated[WeatherClient, Depends(get_weather_client)]

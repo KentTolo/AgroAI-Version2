@@ -78,6 +78,7 @@ export interface Recommendation {
   recommended_crop: string
   predictions: CropPrediction[]
   model_version: string
+  climate_basis: string | null
   warnings: string[]
 }
 
@@ -179,4 +180,59 @@ export interface Dashboard {
   reading_count: number
   recent_recommendations: Recommendation[]
   active_cycles: CropCycle[]
+}
+
+export interface DailyWeather {
+  day: string
+  temperature_mean: number
+  temperature_min: number | null
+  temperature_max: number | null
+  precipitation: number
+  humidity_mean: number | null
+  source: 'archive' | 'recent' | 'forecast'
+}
+
+export interface ClimateSummary {
+  label: string
+  start: string
+  end: string
+  days: number
+  temperature: number
+  humidity: number | null
+  /** Average monthly rainfall, mm per 30 days. */
+  rainfall: number
+  total_rainfall: number
+}
+
+export interface MonthNormal {
+  month: number
+  temperature: number
+  humidity: number | null
+  rainfall: number | null
+  years: number
+}
+
+export interface SeasonClimate {
+  label: string
+  start_month: number
+  months: number
+  temperature: number
+  humidity: number | null
+  rainfall: number
+  years: number
+}
+
+export interface Climate {
+  coverage: { start: string | null; end: string | null; days: number }
+  recent: ClimateSummary[]
+  normals: MonthNormal[]
+  season: SeasonClimate | null
+  attribution: string
+}
+
+export interface WeatherSyncResult {
+  fetched: number
+  total_days: number
+  start: string | null
+  end: string | null
 }

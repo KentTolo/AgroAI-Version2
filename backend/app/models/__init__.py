@@ -5,6 +5,7 @@ from app.models.field import Field
 from app.models.reading import ReadingSource, SensorReading
 from app.models.recommendation import Recommendation
 from app.models.user import User
+from app.models.weather import WeatherDay
 
 __all__ = [
     "CropCycle",
@@ -14,4 +15,5 @@ __all__ = [
     "Recommendation",
     "SensorReading",
     "User",
+    "WeatherDay",
 ]

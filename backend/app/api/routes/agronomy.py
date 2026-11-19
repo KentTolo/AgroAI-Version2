@@ -89,6 +89,7 @@ def create_recommendation(
         predictions=[{"crop": s.crop, "probability": round(s.probability, 4)} for s in ranked],
         recommended_crop=ranked[0].crop,
         model_version=recommender.version,
+        context={"climate_basis": payload.climate_basis} if payload.climate_basis else None,
     )
     db.add(rec)
     db.commit()

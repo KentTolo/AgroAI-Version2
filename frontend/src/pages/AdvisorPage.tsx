@@ -2,6 +2,7 @@ import { useQuery } from '@tanstack/react-query'
 import { ClipboardCheck } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { useSearchParams } from 'react-router'
+import { ClimateSource, type ClimateChoice } from '@/components/ClimateSource'
 import { ConditionsForm } from '@/components/ConditionsForm'
 import { AdvisoryResult } from '@/components/Results'
 import { Button } from '@/components/ui/Button'
@@ -22,6 +23,8 @@ export default function AdvisorPage() {
   const [crop, setCrop] = useState(params.get('crop') ?? '')
   const [cropError, setCropError] = useState<string | null>(null)
   const [manualValues, setValues] = useState<GrowingConditions | null>(null)
+  const [fieldId, setFieldId] = useState('')
+  const [climate, setClimate] = useState<ClimateChoice | null>(null)
 
   // Arriving from a recommendation: reuse its conditions and run the assessment straight away.
   const fromId = params.get('from')
@@ -46,7 +49,8 @@ export default function AdvisorPage() {
     advise.mutate({ crop, conditions })
   }
 
-  const fieldsWithReadings = (fields.data?.items ?? []).filter((f) => f.latest_reading)
+  const allFields = fields.data?.items ?? []
+  const selectedField = allFields.find((f) => f.id === fieldId)
 
   return (
     <>
@@ -79,30 +83,39 @@ export default function AdvisorPage() {
                   </Select>
                 )}
               </FormField>
-              <FormField label="Load from field">
+              <FormField label="Field">
                 {({ id }) => (
                   <Select
                     id={id}
-                    defaultValue=""
-                    disabled={fieldsWithReadings.length === 0}
+                    value={fieldId}
+                    disabled={allFields.length === 0}
                     onChange={(e) => {
-                      const reading = fieldsWithReadings.find((f) => f.id === e.target.value)?.latest_reading
+                      setFieldId(e.target.value)
+                      setClimate(null)
+                      const reading = allFields.find((f) => f.id === e.target.value)?.latest_reading
                       if (reading) setValues(pickConditions(reading))
                     }}
                   >
-                    <option value="">{fieldsWithReadings.length ? 'Latest reading from…' : 'No field readings'}</option>
-                    {fieldsWithReadings.map((f) => (
+                    <option value="">{allFields.length ? 'Fill from a field…' : 'No fields yet'}</option>
+                    {allFields.map((f) => (
                       <option key={f.id} value={f.id}>
                         {f.name}
+                        {f.latest_reading ? '' : ' (no soil reading)'}
                       </option>
                     ))}
                   </Select>
                 )}
               </FormField>
             </div>
+            {selectedField && selectedField.latitude !== null && (
+              <div className="mb-6">
+                <ClimateSource key={selectedField.id} field={selectedField} onChange={setClimate} />
+              </div>
+            )}
             <ConditionsForm
               id="advisor-form"
               values={values}
+              patch={climate?.patch ?? null}
               onSubmit={submit}
               footer={
                 <>

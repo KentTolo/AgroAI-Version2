@@ -1,7 +1,8 @@
-import { ClipboardCheck, Info, RotateCcw, Sparkles, Sprout } from 'lucide-react'
+import { ClipboardCheck, CloudSun, Info, RotateCcw, Sparkles, Sprout } from 'lucide-react'
 import { useState } from 'react'
 import { Link, useSearchParams } from 'react-router'
 import { useQuery } from '@tanstack/react-query'
+import { ClimateSource, type ClimateChoice } from '@/components/ClimateSource'
 import { ConditionsForm } from '@/components/ConditionsForm'
 import { ConditionTiles, PredictionList } from '@/components/Results'
 import { confidenceLabel } from '@/lib/labels'
@@ -78,6 +79,12 @@ function RecommendationResult({ rec }: { rec: Recommendation }) {
       <div className="border-t border-line pt-4">
         <h3 className="mb-3 text-sm font-semibold">Conditions used</h3>
         <ConditionTiles conditions={rec.inputs} />
+        {rec.climate_basis && (
+          <p className="mt-3 flex items-start gap-1.5 text-xs text-fg-muted">
+            <CloudSun className="size-3.5 shrink-0" aria-hidden />
+            Climate: {rec.climate_basis}
+          </p>
+        )}
         <p className="mt-3 flex items-center gap-1.5 text-xs text-fg-subtle">
           <Info className="size-3.5" aria-hidden />
           {formatDateTime(rec.created_at)}
@@ -96,6 +103,7 @@ export default function RecommendPage() {
   // User edits win; otherwise the form mirrors the saved result being viewed.
   const [manualFieldId, setFieldId] = useState<string | null>(null)
   const [manualValues, setValues] = useState<GrowingConditions | null>(null)
+  const [climate, setClimate] = useState<ClimateChoice | null>(null)
 
   const saved = useQuery({
     queryKey: ['recommendations', 'one', resultId],
@@ -109,13 +117,14 @@ export default function RecommendPage() {
 
   const onFieldChange = (id: string) => {
     setFieldId(id)
+    setClimate(null)
     const reading = selectableFields.find((f) => f.id === id)?.latest_reading
     if (reading) setValues(pickConditions(reading))
   }
 
   const submit = (conditions: GrowingConditions) =>
     recommend.mutate(
-      { conditions, field_id: fieldId || null, top_k: 5 },
+      { conditions, field_id: fieldId || null, top_k: 5, climate_basis: climate?.basis ?? null },
       { onSuccess: (rec) => setParams({ id: rec.id }) },
     )
 
@@ -160,9 +169,15 @@ export default function RecommendPage() {
                 </Select>
               )}
             </FormField>
+            {selectedField && selectedField.latitude !== null && (
+              <div className="mb-6">
+                <ClimateSource key={selectedField.id} field={selectedField} onChange={setClimate} />
+              </div>
+            )}
             <ConditionsForm
               id="recommend-form"
               values={values}
+              patch={climate?.patch ?? null}
               onSubmit={submit}
               footer={
                 <>

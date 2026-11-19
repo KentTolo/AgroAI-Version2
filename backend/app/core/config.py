@@ -34,6 +34,13 @@ class Settings(BaseSettings):
 
     cors_origins: Annotated[list[str], NoDecode] = ["http://localhost:5173"]
 
+    # Weather feed (Open-Meteo: free, no API key; data licensed CC BY 4.0).
+    weather_forecast_url: str = "https://api.open-meteo.com/v1/forecast"
+    weather_archive_url: str = "https://archive-api.open-meteo.com/v1/archive"
+    weather_timeout_seconds: float = Field(default=20, gt=0, le=120)
+    # Optional key for Open-Meteo's paid API (with its customer-* URLs). The free tier needs none.
+    weather_api_key: SecretStr | None = None
+
     artifacts_dir: Path = BACKEND_DIR / "artifacts"
     dataset_path: Path = BACKEND_DIR / "data" / "crop_recommendation.csv"
 

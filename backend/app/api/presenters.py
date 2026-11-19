@@ -83,6 +83,7 @@ def recommendation_read(rec: Recommendation, catalog: CropCatalog) -> Recommenda
             for p in rec.predictions
         ],
         model_version=rec.model_version,
+        climate_basis=(rec.context or {}).get("climate_basis"),
         warnings=out_of_range_warnings(rec.inputs, catalog),
     )
 

@@ -7,8 +7,10 @@ against PostgreSQL instead (CI does this).
 from __future__ import annotations
 
 import json
+import math
 import os
 from collections.abc import Callable, Iterator
+from datetime import date, timedelta
 from pathlib import Path
 from typing import Any
 
@@ -22,6 +24,7 @@ from sqlalchemy import Engine, create_engine, event
 from sqlalchemy.orm import Session, sessionmaker
 from sqlalchemy.pool import StaticPool
 
+from app.api.deps import get_weather_client
 from app.core.config import Settings, get_settings
 from app.db.base import Base
 from app.db.session import get_db
@@ -29,6 +32,7 @@ from app.main import create_app
 from app.ml.dataset import load_dataset
 from app.ml.features import FEATURES
 from app.ml.predictor import METADATA_FILENAME, MODEL_FILENAME
+from app.services.weather import DailyWeather, WeatherUnavailableError
 
 RICE_CONDITIONS = {
     "nitrogen": 90,
@@ -104,7 +108,52 @@ def artifacts_dir(tmp_path_factory: pytest.TempPathFactory) -> Path:
     return directory
 
 
-def _client(session_factory: sessionmaker[Session], artifacts: Path) -> Iterator[TestClient]:
+class FakeWeather:
+    """Deterministic stand-in for Open-Meteo: a seasonal cycle typical of the Lesotho lowlands."""
+
+    def __init__(self) -> None:
+        self.calls: list[tuple[str, date, date]] = []
+        self.fail = False
+
+    @staticmethod
+    def day(d: date, source: str) -> DailyWeather:
+        phase = math.cos(2 * math.pi * (d.timetuple().tm_yday - 15) / 365)  # peak mid-January
+        return DailyWeather(
+            day=d,
+            temperature_mean=round(15 + 7 * phase, 1),
+            temperature_min=round(8 + 7 * phase, 1),
+            temperature_max=round(22 + 7 * phase, 1),
+            precipitation=round(max(0.0, 2.5 * phase + 1.0) if d.day % 3 else 0.0, 1),
+            humidity_mean=round(55 + 15 * phase, 1),
+            source=source,
+        )
+
+    def history(
+        self, latitude: float, longitude: float, start: date, end: date
+    ) -> list[DailyWeather]:
+        if self.fail:
+            raise WeatherUnavailableError("The weather service could not be reached.")
+        self.calls.append(("history", start, end))
+        return [
+            self.day(start + timedelta(days=i), "archive") for i in range((end - start).days + 1)
+        ]
+
+    def forecast(self, latitude: float, longitude: float, days: int) -> list[DailyWeather]:
+        if self.fail:
+            raise WeatherUnavailableError("The weather service could not be reached.")
+        today = date.today()
+        self.calls.append(("forecast", today, today + timedelta(days=days - 1)))
+        return [self.day(today + timedelta(days=i), "forecast") for i in range(days)]
+
+
+@pytest.fixture
+def fake_weather() -> FakeWeather:
+    return FakeWeather()
+
+
+def _client(
+    session_factory: sessionmaker[Session], artifacts: Path, weather: FakeWeather
+) -> Iterator[TestClient]:
     settings = Settings(artifacts_dir=artifacts, environment="test")
     app = create_app(settings)
 
@@ -113,20 +162,23 @@ def _client(session_factory: sessionmaker[Session], artifacts: Path) -> Iterator
             yield session
 
     app.dependency_overrides[get_db] = override_db
+    app.dependency_overrides[get_weather_client] = lambda: weather
     with TestClient(app) as client:
         yield client
 
 
 @pytest.fixture
-def client(session_factory: sessionmaker[Session], artifacts_dir: Path) -> Iterator[TestClient]:
-    yield from _client(session_factory, artifacts_dir)
+def client(
+    session_factory: sessionmaker[Session], artifacts_dir: Path, fake_weather: FakeWeather
+) -> Iterator[TestClient]:
+    yield from _client(session_factory, artifacts_dir, fake_weather)
 
 
 @pytest.fixture
 def client_without_model(
-    session_factory: sessionmaker[Session], tmp_path: Path
+    session_factory: sessionmaker[Session], tmp_path: Path, fake_weather: FakeWeather
 ) -> Iterator[TestClient]:
-    yield from _client(session_factory, tmp_path)
+    yield from _client(session_factory, tmp_path, fake_weather)
 
 
 RegisterFn = Callable[..., dict[str, str]]

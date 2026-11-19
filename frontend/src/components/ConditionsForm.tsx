@@ -23,6 +23,8 @@ interface ConditionsFormProps {
   defaultValues?: Partial<GrowingConditions>
   /** Replaces the form contents whenever it changes (e.g. after loading a field reading). */
   values?: GrowingConditions | null
+  /** Overwrites only the given fields (e.g. climate from weather), keeping the rest. */
+  patch?: Partial<GrowingConditions> | null
   onSubmit: (values: GrowingConditions) => void
   footer?: ReactNode
 }
@@ -32,11 +34,12 @@ const GROUPS = [
   { key: 'climate', title: 'Climate' },
 ] as const
 
-export function ConditionsForm({ id, defaultValues, values, onSubmit, footer }: ConditionsFormProps) {
+export function ConditionsForm({ id, defaultValues, values, patch, onSubmit, footer }: ConditionsFormProps) {
   const {
     register,
     handleSubmit,
     reset,
+    setValue,
     formState: { errors },
   } = useForm<GrowingConditions>({
     resolver: zodResolver(schema),
@@ -46,6 +49,13 @@ export function ConditionsForm({ id, defaultValues, values, onSubmit, footer }: 
   useEffect(() => {
     if (values) reset(values)
   }, [values, reset])
+
+  useEffect(() => {
+    if (!patch) return
+    for (const [key, value] of Object.entries(patch) as [keyof GrowingConditions, number][]) {
+      setValue(key, value, { shouldValidate: true, shouldDirty: true })
+    }
+  }, [patch, setValue])
 
   return (
     <form id={id} onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-6">

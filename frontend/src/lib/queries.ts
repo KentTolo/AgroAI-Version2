@@ -15,6 +15,7 @@ export const keys = {
   crops: ['crops'] as const,
   crop: (slug: string) => ['crops', slug] as const,
   model: ['model'] as const,
+  weather: (id: string) => ['weather', id] as const,
 }
 
 export const useDashboard = () => useQuery({ queryKey: keys.dashboard, queryFn: api.dashboard })
@@ -134,3 +135,40 @@ export function useDeleteRecommendation() {
 }
 
 export const useAdvise = () => useMutation({ mutationFn: api.advise })
+
+/* ---------- Weather ---------- */
+
+export const useForecast = (fieldId: string, enabled = true) =>
+  useQuery({
+    queryKey: [...keys.weather(fieldId), 'forecast'],
+    queryFn: () => api.forecast(fieldId),
+    enabled,
+    staleTime: 30 * 60_000,
+    retry: 1,
+  })
+
+export const useWeatherHistory = (fieldId: string, since: string | undefined, enabled = true) =>
+  useQuery({
+    queryKey: [...keys.weather(fieldId), 'history', since ?? 'all'],
+    queryFn: () => api.weatherHistory(fieldId, since),
+    enabled,
+  })
+
+export const useClimate = (
+  fieldId: string,
+  season: { start: number; months: number } | undefined,
+  enabled = true,
+) =>
+  useQuery({
+    queryKey: [...keys.weather(fieldId), 'climate', season?.start ?? 0, season?.months ?? 0],
+    queryFn: () => api.climate(fieldId, season),
+    enabled,
+  })
+
+export function useSyncWeather(fieldId: string) {
+  const client = useQueryClient()
+  return useMutation({
+    mutationFn: (years: number = 3) => api.syncWeather(fieldId, years),
+    onSuccess: () => client.invalidateQueries({ queryKey: keys.weather(fieldId) }),
+  })
+}

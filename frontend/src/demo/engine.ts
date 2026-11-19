@@ -315,3 +315,168 @@ export function generateSeries(
     return { recordedAt: start + options.intervalMs * step, values }
   })
 }
+
+/* ---------- Weather (mirrors backend/app/services/weather.py) ---------- */
+
+export interface WeatherDay {
+  day: string
+  temperature_mean: number
+  temperature_min: number | null
+  temperature_max: number | null
+  precipitation: number
+  humidity_mean: number | null
+  source: 'archive' | 'recent' | 'forecast'
+}
+
+const DAILY_VARIABLES = [
+  'temperature_2m_mean',
+  'temperature_2m_min',
+  'temperature_2m_max',
+  'precipitation_sum',
+  'relative_humidity_2m_mean',
+] as const
+const ARCHIVE_LAG_DAYS = 6
+const RAIN_PERIOD_DAYS = 30
+const MIN_DAYS_FOR_MONTHLY_TOTAL = 25
+const MONTH_NAMES = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+
+type Daily = Partial<Record<(typeof DAILY_VARIABLES)[number], (number | null)[]>> & { time?: string[] }
+
+export function parseDaily(payload: { daily?: Daily }, source: WeatherDay['source']): WeatherDay[] {
+  const daily = payload.daily ?? {}
+  const times = daily.time ?? []
+  const at = (name: (typeof DAILY_VARIABLES)[number], i: number) => daily[name]?.[i] ?? null
+  const out: WeatherDay[] = []
+  times.forEach((day, i) => {
+    const min = at('temperature_2m_min', i)
+    const max = at('temperature_2m_max', i)
+    let mean = at('temperature_2m_mean', i)
+    if (mean === null && min !== null && max !== null) mean = (min + max) / 2
+    if (mean === null) return
+    out.push({
+      day,
+      temperature_mean: mean,
+      temperature_min: min,
+      temperature_max: max,
+      precipitation: at('precipitation_sum', i) ?? 0,
+      humidity_mean: at('relative_humidity_2m_mean', i),
+      source,
+    })
+  })
+  return out
+}
+
+const FORECAST_URL = 'https://api.open-meteo.com/v1/forecast'
+const ARCHIVE_URL = 'https://archive-api.open-meteo.com/v1/archive'
+
+async function openMeteo(url: string, params: Record<string, string | number>) {
+  const query = new URLSearchParams({ ...Object.fromEntries(Object.entries(params).map(([k, v]) => [k, String(v)])), daily: DAILY_VARIABLES.join(','), timezone: 'auto' })
+  let response: Response
+  try {
+    response = await fetch(`${url}?${query}`)
+  } catch {
+    throw new Error('The weather service could not be reached.')
+  }
+  if (!response.ok) {
+    const body = (await response.json().catch(() => ({}))) as { reason?: string }
+    throw new Error(`The weather service returned an error (${response.status}). ${body.reason ?? ''}`.trim())
+  }
+  return (await response.json()) as { daily?: Daily }
+}
+
+export async function fetchHistory(lat: number, lon: number, start: string, end: string, today: string): Promise<WeatherDay[]> {
+  const archiveEnd = [end, addDays(today, -ARCHIVE_LAG_DAYS)].sort()[0] as string
+  const records: WeatherDay[] = []
+  if (start <= archiveEnd) {
+    records.push(...parseDaily(await openMeteo(ARCHIVE_URL, { latitude: lat, longitude: lon, start_date: start, end_date: archiveEnd }), 'archive'))
+  }
+  const recentStart = [start, addDays(archiveEnd, 1)].sort()[1] as string
+  if (recentStart <= end) {
+    records.push(...parseDaily(await openMeteo(FORECAST_URL, { latitude: lat, longitude: lon, start_date: recentStart, end_date: end }), 'recent'))
+  }
+  const unique = new Map<string, WeatherDay>()
+  for (const r of records) if (!unique.has(r.day)) unique.set(r.day, r)
+  return [...unique.values()].sort((a, b) => a.day.localeCompare(b.day))
+}
+
+export async function fetchForecast(lat: number, lon: number, days: number): Promise<WeatherDay[]> {
+  return parseDaily(await openMeteo(FORECAST_URL, { latitude: lat, longitude: lon, forecast_days: days }), 'forecast')
+}
+
+const round1 = (n: number) => Math.round(n * 10) / 10
+const mean = (xs: number[]) => xs.reduce((s, x) => s + x, 0) / xs.length
+const meanOrNull = (xs: (number | null)[]) => {
+  const present = xs.filter((x): x is number => x !== null)
+  return present.length ? round1(mean(present)) : null
+}
+
+export function summarise(days: WeatherDay[], label: string) {
+  if (days.length === 0) return null
+  const ordered = [...days].sort((a, b) => a.day.localeCompare(b.day))
+  const total = ordered.reduce((s, d) => s + d.precipitation, 0)
+  return {
+    label,
+    start: ordered[0]!.day,
+    end: ordered[ordered.length - 1]!.day,
+    days: ordered.length,
+    temperature: round1(mean(ordered.map((d) => d.temperature_mean))),
+    humidity: meanOrNull(ordered.map((d) => d.humidity_mean)),
+    rainfall: round1((total / ordered.length) * RAIN_PERIOD_DAYS),
+    total_rainfall: round1(total),
+  }
+}
+
+export function recentSummaries(days: WeatherDay[], windows = [30, 90, 365]) {
+  if (days.length === 0) return []
+  const latest = days.reduce((m, d) => (d.day > m ? d.day : m), days[0]!.day)
+  return windows.flatMap((w) => {
+    const start = addDays(latest, -(w - 1))
+    const subset = days.filter((d) => d.day >= start)
+    const s = subset.length >= w * 0.8 ? summarise(subset, `Last ${w} days`) : null
+    return s ? [s] : []
+  })
+}
+
+export function monthlyNormals(days: WeatherDay[]) {
+  const byMonth = new Map<number, WeatherDay[]>()
+  const byYearMonth = new Map<string, WeatherDay[]>()
+  for (const d of days) {
+    const [y, m] = d.day.split('-').map(Number) as [number, number]
+    byMonth.set(m, [...(byMonth.get(m) ?? []), d])
+    const key = `${y}-${m}`
+    byYearMonth.set(key, [...(byYearMonth.get(key) ?? []), d])
+  }
+  const normals = []
+  for (let month = 1; month <= 12; month++) {
+    const monthDays = byMonth.get(month)
+    if (!monthDays) continue
+    const groups = [...byYearMonth.entries()].filter(([k]) => Number(k.split('-')[1]) === month)
+    const totals = groups.filter(([, g]) => g.length >= MIN_DAYS_FOR_MONTHLY_TOTAL).map(([, g]) => g.reduce((s, d) => s + d.precipitation, 0))
+    normals.push({
+      month,
+      temperature: round1(mean(monthDays.map((d) => d.temperature_mean))),
+      humidity: meanOrNull(monthDays.map((d) => d.humidity_mean)),
+      rainfall: totals.length ? round1(mean(totals)) : null,
+      years: groups.length,
+    })
+  }
+  return normals
+}
+
+export function seasonClimate(normals: ReturnType<typeof monthlyNormals>, startMonth: number, months: number) {
+  const wanted = Array.from({ length: months }, (_, i) => ((startMonth - 1 + i) % 12) + 1)
+  const chosen = wanted.map((m) => normals.find((n) => n.month === m))
+  if (chosen.some((n) => !n || n.rainfall === null)) return null
+  const present = chosen as NonNullable<(typeof chosen)[number]>[]
+  const first = MONTH_NAMES[wanted[0]! - 1]
+  const last = MONTH_NAMES[wanted[wanted.length - 1]! - 1]
+  return {
+    label: months > 1 ? `Typical ${first}–${last}` : `Typical ${first}`,
+    start_month: startMonth,
+    months,
+    temperature: round1(mean(present.map((n) => n.temperature))),
+    humidity: meanOrNull(present.map((n) => n.humidity)),
+    rainfall: round1(mean(present.map((n) => n.rainfall as number))),
+    years: Math.min(...present.map((n) => n.years)),
+  }
+}

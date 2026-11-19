@@ -45,6 +45,11 @@ class RecommendationRequest(Schema):
         default=None, description="Field to link the recommendation to"
     )
     top_k: int = Field(default=3, ge=1, le=10, description="Number of ranked crops to return")
+    climate_basis: str | None = Field(
+        default=None,
+        max_length=200,
+        description="Where the climate values came from, e.g. 'Typical Oct–Jan (Open-Meteo)'",
+    )
 
     @model_validator(mode="after")
     def _needs_input(self) -> RecommendationRequest:
@@ -67,6 +72,7 @@ class RecommendationRead(Schema):
     recommended_crop: str
     predictions: list[CropPrediction]
     model_version: str
+    climate_basis: str | None = None
     warnings: list[str] = Field(default_factory=list)
 
 

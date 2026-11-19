@@ -2,6 +2,9 @@
 
 import type {
   Advisory,
+  Climate,
+  DailyWeather,
+  WeatherSyncResult,
   Crop,
   CropCycle,
   CycleStatus,
@@ -210,6 +213,7 @@ export const api = {
     conditions?: GrowingConditions
     field_id?: string | null
     top_k?: number
+    climate_basis?: string | null
   }) => request<Recommendation>('/recommendations', { method: 'POST', body: input }),
   recommendations: (query: { field_id?: string; limit?: number; offset?: number } = {}) =>
     request<Page<Recommendation>>('/recommendations', { query: { ...query } }),
@@ -219,6 +223,17 @@ export const api = {
 
   advise: (input: { crop: string; conditions: GrowingConditions }) =>
     request<Advisory>('/advisory', { method: 'POST', body: input }),
+
+  forecast: (fieldId: string, days = 7) =>
+    request<DailyWeather[]>(`/fields/${fieldId}/weather/forecast`, { query: { days } }),
+  weatherHistory: (fieldId: string, since?: string) =>
+    request<DailyWeather[]>(`/fields/${fieldId}/weather`, { query: { since } }),
+  syncWeather: (fieldId: string, years = 3) =>
+    request<WeatherSyncResult>(`/fields/${fieldId}/weather/sync`, { method: 'POST', body: { years } }),
+  climate: (fieldId: string, season?: { start: number; months: number }) =>
+    request<Climate>(`/fields/${fieldId}/weather/climate`, {
+      query: { season_start: season?.start, season_months: season?.months },
+    }),
 
   crops: () => request<Crop[]>('/crops'),
   crop: (slug: string) => request<Crop>(`/crops/${slug}`),

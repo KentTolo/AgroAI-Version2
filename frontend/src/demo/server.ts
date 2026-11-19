@@ -19,6 +19,12 @@ import type {
 import {
   addDays,
   assess,
+  fetchForecast,
+  fetchHistory,
+  monthlyNormals,
+  recentSummaries,
+  seasonClimate,
+  type WeatherDay,
   computeProgress,
   generateSeries,
   isoDate,
@@ -47,6 +53,7 @@ interface Db {
   readings: Reading[]
   cycles: StoredCycle[]
   recommendations: StoredRecommendation[]
+  weather?: (WeatherDay & { field_id: string })[]
 }
 
 const emptyDb = (): Db => ({ users: [], sessions: {}, fields: [], readings: [], cycles: [], recommendations: [] })
@@ -216,6 +223,7 @@ async function seedDemoAccount(db: Db) {
         predictions: ranked.map((s) => ({ crop: s.crop, name: cropName(knowledge, s.crop), probability: Math.round(s.probability * 1e4) / 1e4 })),
         recommended_crop: ranked[0]?.crop ?? '',
         model_version: model.version,
+        climate_basis: null,
       })
     }
   }
@@ -345,6 +353,17 @@ export async function handleDemoRequest({ method, path, token, body, form, query
     if (!cycle || !db.fields.some((f) => f.id === cycle.field_id && f.owner_id === user.id)) fail(404, 'Crop cycle not found')
     return cycle!
   }
+  const located = (field: StoredField): [number, number] =>
+    field.latitude !== null && field.longitude !== null
+      ? [field.latitude, field.longitude]
+      : fail(409, 'Add a location to this field to use weather data.')
+  const weatherCall = async <T>(call: () => Promise<T>): Promise<T> => {
+    try {
+      return await call()
+    } catch (err) {
+      return fail(502, err instanceof Error ? err.message : 'The weather service could not be reached.')
+    }
+  }
   const commit = <T>(value: T): T => {
     save(db)
     return value
@@ -431,6 +450,7 @@ export async function handleDemoRequest({ method, path, token, body, form, query
       db.fields = db.fields.filter((f) => f.id !== id)
       db.readings = db.readings.filter((r) => r.field_id !== id)
       db.cycles = db.cycles.filter((c) => c.field_id !== id)
+      db.weather = (db.weather ?? []).filter((w) => w.field_id !== id)
       for (const r of db.recommendations) if (r.field_id === id) r.field_id = null
       return commit(undefined)
     }
@@ -536,6 +556,7 @@ export async function handleDemoRequest({ method, path, token, body, form, query
         predictions: ranked.map((s) => ({ crop: s.crop, name: cropName(knowledge, s.crop), probability: Math.round(s.probability * 1e4) / 1e4 })),
         recommended_crop: ranked[0]?.crop ?? '',
         model_version: model.version,
+        climate_basis: typeof input.climate_basis === 'string' ? input.climate_basis.slice(0, 200) : null,
       }
       db.recommendations.push(rec)
       return commit(presentRec(rec))
@@ -555,6 +576,61 @@ export async function handleDemoRequest({ method, path, token, body, form, query
       if (!db.recommendations.some((r) => r.id === id && r.user_id === user.id)) fail(404, 'Recommendation not found')
       db.recommendations = db.recommendations.filter((r) => r.id !== id)
       return commit(undefined)
+    }
+
+    case 'GET /fields/:id/weather/forecast': {
+      const [lat, lon] = located(ownedField(id))
+      return weatherCall(() => fetchForecast(lat, lon, Math.min(Math.max(Number(q('days') ?? 7), 1), 16)))
+    }
+    case 'POST /fields/:id/weather/sync': {
+      const field = ownedField(id)
+      const [lat, lon] = located(field)
+      const years = Math.min(Math.max(Number(input.years ?? 3), 1), 10)
+      const end = today()
+      const wantedStart = addDays(end, -365 * years)
+      const stored = (db.weather ?? []).filter((w) => w.field_id === id).map((w) => w.day).sort()
+      const ranges: [string, string][] = []
+      if (stored.length === 0) ranges.push([wantedStart, end])
+      else {
+        if (wantedStart < stored[0]!) ranges.push([wantedStart, addDays(stored[0]!, -1)])
+        const refresh = addDays(stored[stored.length - 1]!, -7)
+        ranges.push([refresh > stored[0]! ? refresh : stored[0]!, end])
+      }
+      let fetched = 0
+      for (const [start, stop] of ranges) {
+        const records = await weatherCall(() => fetchHistory(lat, lon, start, stop, end))
+        if (records.length === 0) continue
+        const first = records[0]!.day
+        const last = records[records.length - 1]!.day
+        db.weather = (db.weather ?? []).filter((w) => w.field_id !== id || w.day < first || w.day > last)
+        db.weather.push(...records.map((r) => ({ ...r, field_id: id })))
+        fetched += records.length
+      }
+      const days = (db.weather ?? []).filter((w) => w.field_id === id).map((w) => w.day).sort()
+      return commit({ fetched, total_days: days.length, start: days[0] ?? null, end: days[days.length - 1] ?? null })
+    }
+    case 'GET /fields/:id/weather': {
+      ownedField(id)
+      const since = q('since')
+      const until = q('until')
+      return (db.weather ?? [])
+        .filter((w) => w.field_id === id && (!since || w.day >= since) && (!until || w.day <= until))
+        .sort((a, b) => a.day.localeCompare(b.day))
+        .map(({ field_id: _f, ...day }) => day)
+    }
+    case 'GET /fields/:id/weather/climate': {
+      ownedField(id)
+      const days = (db.weather ?? []).filter((w) => w.field_id === id)
+      const normals = monthlyNormals(days)
+      const start = q('season_start')
+      const sorted = days.map((d) => d.day).sort()
+      return {
+        coverage: { start: sorted[0] ?? null, end: sorted[sorted.length - 1] ?? null, days: days.length },
+        recent: recentSummaries(days),
+        normals,
+        season: start ? seasonClimate(normals, Number(start), Number(q('season_months') ?? 4)) : null,
+        attribution: 'Weather data by Open-Meteo.com (CC BY 4.0)',
+      }
     }
 
     case 'POST /advisory': {

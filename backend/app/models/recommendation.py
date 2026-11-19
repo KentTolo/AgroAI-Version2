@@ -28,6 +28,8 @@ class Recommendation(UUIDPrimaryKey, Base):
     predictions: Mapped[list[dict[str, Any]]]
     recommended_crop: Mapped[str] = mapped_column(String(40))
     model_version: Mapped[str] = mapped_column(String(64))
+    # Where the inputs came from, e.g. {"climate_basis": "Typical Oct–Jan, 2023–2026 (Open-Meteo)"}.
+    context: Mapped[dict[str, Any] | None] = mapped_column(default=None)
     created_at: Mapped[datetime] = mapped_column(default=utcnow)
 
     user: Mapped[User] = relationship(back_populates="recommendations")

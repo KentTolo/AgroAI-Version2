@@ -12,6 +12,7 @@ if TYPE_CHECKING:
     from app.models.crop_cycle import CropCycle
     from app.models.reading import SensorReading
     from app.models.user import User
+    from app.models.weather import WeatherDay
 
 
 class Field(UUIDPrimaryKey, Timestamps, Base):
@@ -40,5 +41,8 @@ class Field(UUIDPrimaryKey, Timestamps, Base):
         back_populates="field", cascade="all, delete-orphan", passive_deletes=True
     )
     cycles: Mapped[list[CropCycle]] = relationship(
+        back_populates="field", cascade="all, delete-orphan", passive_deletes=True
+    )
+    weather_days: Mapped[list[WeatherDay]] = relationship(
         back_populates="field", cascade="all, delete-orphan", passive_deletes=True
     )
