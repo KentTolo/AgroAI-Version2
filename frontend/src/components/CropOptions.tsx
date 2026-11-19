@@ -5,6 +5,18 @@ const ORDER: LesothoStatus[] = ['staple', 'common', 'possible', 'unsuitable']
 
 /** <option>s for a crop picker, grouped so the crops Lesotho grows most come first. */
 export function CropOptions({ crops }: { crops: Crop[] | undefined }) {
+  // An older API sends no Lesotho status: list every crop rather than none.
+  if (crops?.some((c) => !ORDER.includes(c.lesotho))) {
+    return (
+      <>
+        {crops.map((c) => (
+          <option key={c.slug} value={c.slug}>
+            {c.name}
+          </option>
+        ))}
+      </>
+    )
+  }
   return (
     <>
       {ORDER.map((status) => {

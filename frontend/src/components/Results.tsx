@@ -18,7 +18,7 @@ export function PredictionList({ predictions }: { predictions: CropPrediction[] 
             <span className="font-medium text-fg">
               <span className="mr-2 text-fg-subtle tabular-nums">{index + 1}.</span>
               {p.name}
-              {!p.grown_in_lesotho && (
+              {p.grown_in_lesotho === false && (
                 <Badge tone="neutral" className="ml-2 align-middle">
                   Not grown in Lesotho
                 </Badge>

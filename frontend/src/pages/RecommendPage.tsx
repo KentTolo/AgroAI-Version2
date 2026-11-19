@@ -69,7 +69,7 @@ function RecommendationResult({ rec }: { rec: Recommendation }) {
         <PredictionList predictions={rec.predictions} />
       </div>
 
-      {rec.also_consider.length > 0 && (
+      {(rec.also_consider?.length ?? 0) > 0 && (
         <div>
           <h3 className="text-sm font-semibold">Other Lesotho staples</h3>
           <p className="mt-0.5 mb-3 text-xs text-fg-muted">

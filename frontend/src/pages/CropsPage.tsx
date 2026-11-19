@@ -87,7 +87,10 @@ export default function CropsPage() {
       ) : (
         <div className="space-y-10">
           {STATUS_ORDER.map((status) => {
-            const group = filtered.filter((c) => c.lesotho === status)
+            // Crops without a known status (older API) are shown with the common ones.
+            const group = filtered.filter(
+              (c) => c.lesotho === status || (status === 'common' && !STATUS_ORDER.includes(c.lesotho)),
+            )
             if (group.length === 0) return null
             const info = LESOTHO_STATUS[status]
             const collapsed = status === 'unsuitable' && !showUnsuitable && !query.trim()
