@@ -38,7 +38,7 @@ import { DEMO_EMAIL, DEMO_PASSWORD } from './credentials'
 
 const STORE_KEY = 'agroai.demo.v1'
 
-interface StoredUser extends User {
+interface StoredUser extends Omit<User, 'is_admin'> {
   password_hash: string
   salt: string
 }
@@ -158,6 +158,7 @@ const PUBLIC_USER = ({ id, email, full_name, created_at, last_login_at }: Stored
   full_name,
   created_at,
   last_login_at,
+  is_admin: false,
 })
 
 /* ---------- Seeding ---------- */

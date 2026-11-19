@@ -8,6 +8,7 @@ import {
   LogOut,
   Map,
   Settings,
+  ShieldCheck,
   Sparkles,
 } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
@@ -91,6 +92,11 @@ function UserMenu() {
             <p className="truncate text-xs text-fg-subtle">{user?.email}</p>
           </div>
           <div className="border-t border-line pt-2">
+            {user?.is_admin && (
+              <Link role="menuitem" to="/app/admin" className={item}>
+                <ShieldCheck /> Admin dashboard
+              </Link>
+            )}
             <Link role="menuitem" to="/app/history" className={item}>
               <History /> Recommendation history
             </Link>

@@ -23,6 +23,7 @@ const CropsPage = lazy(() => import('./pages/CropsPage'))
 const CropDetailPage = lazy(() => import('./pages/CropDetailPage'))
 const HistoryPage = lazy(() => import('./pages/HistoryPage'))
 const SettingsPage = lazy(() => import('./pages/SettingsPage'))
+const AdminPage = lazy(() => import('./pages/AdminPage'))
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -87,6 +88,7 @@ const router = createBrowserRouter(
                   { path: 'crops/:slug', element: <CropDetailPage /> },
                   { path: 'history', element: <HistoryPage /> },
                   { path: 'settings', element: <SettingsPage /> },
+                  { path: 'admin', element: <AdminPage /> },
                   { path: '*', element: <NotFoundPage inline /> },
                 ],
               },

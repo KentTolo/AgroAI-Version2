@@ -33,6 +33,8 @@ class Settings(BaseSettings):
     access_token_expire_minutes: int = Field(default=60, ge=5, le=60 * 24 * 7)
 
     cors_origins: Annotated[list[str], NoDecode] = ["http://localhost:5173"]
+    # Accounts registered with these emails can open the admin dashboard.
+    admin_emails: Annotated[list[str], NoDecode] = []
 
     # Weather feed (Open-Meteo: free, no API key; data licensed CC BY 4.0).
     weather_forecast_url: str = "https://api.open-meteo.com/v1/forecast"
@@ -44,12 +46,17 @@ class Settings(BaseSettings):
     artifacts_dir: Path = BACKEND_DIR / "artifacts"
     dataset_path: Path = BACKEND_DIR / "data" / "crop_recommendation.csv"
 
-    @field_validator("cors_origins", mode="before")
+    @field_validator("cors_origins", "admin_emails", mode="before")
     @classmethod
-    def _split_origins(cls, value: object) -> object:
+    def _split_list(cls, value: object) -> object:
         if isinstance(value, str):
-            return [origin.strip() for origin in value.split(",") if origin.strip()]
+            return [item.strip() for item in value.split(",") if item.strip()]
         return value
+
+    @field_validator("admin_emails")
+    @classmethod
+    def _lowercase_emails(cls, value: list[str]) -> list[str]:
+        return [email.lower() for email in value]
 
     @model_validator(mode="after")
     def _require_real_secret_in_production(self) -> Settings:

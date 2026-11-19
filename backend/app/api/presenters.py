@@ -5,8 +5,9 @@ from __future__ import annotations
 from dataclasses import asdict
 from datetime import date
 
+from app.api.deps import is_admin
 from app.ml.features import PARAMETERS
-from app.models import CropCycle, CycleStatus, Recommendation
+from app.models import CropCycle, CycleStatus, Recommendation, User
 from app.schemas.agronomy import (
     AdvisoryRead,
     CropPrediction,
@@ -18,6 +19,7 @@ from app.schemas.agronomy import (
     RecommendationRead,
 )
 from app.schemas.common import GrowingConditions
+from app.schemas.user import UserRead
 from app.services.advisory import SEVERITY_SCORES, Assessment
 from app.services.crops import CropCatalog, CropInfo
 from app.services.growth import compute_progress
@@ -129,3 +131,7 @@ def cycle_read(cycle: CropCycle, catalog: CropCatalog, today: date | None = None
         created_at=cycle.created_at,
         progress=progress,
     )
+
+
+def user_read(user: User) -> UserRead:
+    return UserRead.model_validate(user).model_copy(update={"is_admin": is_admin(user)})

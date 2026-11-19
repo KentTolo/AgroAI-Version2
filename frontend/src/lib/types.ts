@@ -24,6 +24,7 @@ export interface User {
   full_name: string
   created_at: string
   last_login_at: string | null
+  is_admin: boolean
 }
 
 export interface Token {
@@ -272,4 +273,41 @@ export interface SensorSummary {
   air_humidity: number | null
   soil_moisture: number | null
   soil_temperature: number | null
+}
+
+export interface AdminOverview {
+  users: number
+  users_active_7d: number
+  fields: number
+  mapped_fields: number
+  soil_readings: number
+  devices: number
+  devices_online: number
+  telemetry_24h: number
+  recommendations: number
+  active_cycles: number
+  weather_days: number
+  signups: { day: string; count: number }[]
+  recent_recommendations: {
+    id: string
+    created_at: string
+    user_email: string
+    field_name: string | null
+    crop: string
+    probability: number
+    climate_basis: string | null
+  }[]
+}
+
+export interface AdminUserRow {
+  id: string
+  email: string
+  full_name: string
+  is_admin: boolean
+  created_at: string
+  last_login_at: string | null
+  fields: number
+  soil_readings: number
+  devices: number
+  recommendations: number
 }

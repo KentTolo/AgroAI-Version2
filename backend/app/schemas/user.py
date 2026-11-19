@@ -55,6 +55,7 @@ class UserRead(Schema):
     full_name: str
     created_at: datetime
     last_login_at: datetime | None
+    is_admin: bool = False
 
 
 class Token(Schema):

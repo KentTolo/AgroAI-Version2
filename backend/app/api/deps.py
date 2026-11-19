@@ -43,6 +43,19 @@ def get_current_user(db: DbSession, token: Annotated[str, Depends(oauth2_scheme)
 CurrentUser = Annotated[User, Depends(get_current_user)]
 
 
+def is_admin(user: User) -> bool:
+    return user.email.lower() in get_settings().admin_emails
+
+
+def get_admin_user(user: CurrentUser) -> User:
+    if not is_admin(user):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Admins only")
+    return user
+
+
+AdminUser = Annotated[User, Depends(get_admin_user)]
+
+
 def get_owned_field(field_id: uuid.UUID, db: DbSession, user: CurrentUser) -> Field:
     field = db.get(Field, field_id)
     # Report someone else's field as missing so IDs can't be probed.

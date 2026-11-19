@@ -1,6 +1,8 @@
 /** Minimal typed client for the AgroAI API. */
 
 import type {
+  AdminOverview,
+  AdminUserRow,
   Advisory,
   Device,
   DeviceWithKey,
@@ -253,6 +255,9 @@ export const api = {
     request<Telemetry[]>(`/fields/${fieldId}/telemetry`, { query: { since } }),
   telemetrySummary: (fieldId: string, days = 7) =>
     request<SensorSummary>(`/fields/${fieldId}/telemetry/summary`, { query: { days } }),
+
+  adminOverview: () => request<AdminOverview>('/admin/overview'),
+  adminUsers: () => request<AdminUserRow[]>('/admin/users'),
 
   crops: () => request<Crop[]>('/crops'),
   crop: (slug: string) => request<Crop>(`/crops/${slug}`),
