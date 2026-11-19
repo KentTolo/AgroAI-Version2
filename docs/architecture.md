@@ -12,7 +12,8 @@
 
 - **Frontend:** React 19 + TypeScript, built by Vite and served by nginx. React Router handles
   navigation, TanStack Query handles server state and caching, react-hook-form + Zod handle form
-  validation, Leaflet draws maps and Recharts draws charts. Styling is Tailwind CSS with semantic
+  validation, MapLibre GL draws maps (loaded only when a map is on screen) and Recharts draws
+  charts. Styling is Tailwind CSS with semantic
   colour tokens, and light and dark themes follow the operating-system setting.
 - **Backend:** FastAPI on Python 3.12+, SQLAlchemy 2 (synchronous), Alembic migrations,
   Pydantic v2 settings and schemas.
@@ -75,6 +76,7 @@ database and model and returns 503 when either is unavailable.
 | Model trained at image build, not committed | Keeps binaries out of git; every image ships a reproducible artifact whose version is recorded on each prediction. |
 | Rule-based advisory derived from data | The original project's hand-picked single "ideal" values (and a ±5 mm rainfall tolerance) were replaced by per-crop percentile bands computed from the dataset, so advice is consistent with what the model learned. |
 | Latitude/longitude columns instead of PostGIS | The app only needs points; plain columns keep deployment simple. PostGIS can be added when boundary polygons are needed. |
+| Free, keyless base maps | MapLibre GL with OpenFreeMap vector tiles (OpenStreetMap data) and Esri World Imagery for satellite view, the open sources catalogued by the [God's Eye View](https://github.com/bilawalsidhu/gods-eye-view) project. No API keys or billing; both need their on-map credit, which the map shows. |
 | Synchronous SQLAlchemy | Request handlers are short and CPU-light; sync code is simpler to reason about and FastAPI runs it in a thread pool. |
 | Separate telemetry for stations | Stations measure different things from a soil test (air, soil moisture), with every value optional, so they post to `/telemetry` with a per-device key instead of a user's login. |
 | Weather stored, not fetched per request | History is synced incrementally into `weather_days`, so climate summaries are fast and keep working if the provider is briefly unavailable or rate-limited. |

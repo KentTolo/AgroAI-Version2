@@ -1,5 +1,4 @@
 @import 'tailwindcss';
-@import 'leaflet/dist/leaflet.css';
 @import '@fontsource-variable/manrope';
 @import '@fontsource-variable/fraunces';
 
@@ -159,14 +158,46 @@
   }
 }
 
-/* Leaflet sits inside rounded cards; keep it on-theme and below dialogs. */
-.leaflet-container {
+/* MapLibre maps sit inside rounded cards; keep them on-theme and below dialogs. */
+.agro-map {
   font: inherit;
   background: var(--surface-muted);
   z-index: 0;
 }
-.leaflet-control-attribution {
+.agro-map-pick .maplibregl-canvas-container.maplibregl-interactive {
+  cursor: crosshair;
+}
+.agro-map .maplibregl-ctrl-attrib {
   font-size: 10px;
+}
+.agro-marker {
+  display: block;
+  width: 18px;
+  height: 18px;
+  padding: 0;
+  border-radius: 9999px;
+  background: var(--brand);
+  border: 3px solid #fff;
+  box-shadow: 0 1px 4px rgb(0 0 0 / 0.35);
+}
+button.agro-marker {
+  cursor: pointer;
+}
+button.agro-marker:focus-visible {
+  outline: 3px solid var(--brand-soft);
+}
+.agro-tip .maplibregl-popup-content {
+  padding: 4px 8px;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--fg);
+  background: var(--surface);
+  border-radius: 6px;
+  box-shadow: 0 2px 8px rgb(0 0 0 / 0.2);
+}
+.agro-tip.maplibregl-popup-anchor-bottom .maplibregl-popup-tip {
+  border-top-color: var(--surface);
 }
 
 @media (prefers-reduced-motion: reduce) {

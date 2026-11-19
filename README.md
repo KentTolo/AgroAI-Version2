@@ -17,7 +17,7 @@ runs on Render's free tier, so the first request after a quiet spell takes up to
 |---|---|
 | **Crop recommendations** | A Random Forest model ranks 22 crops from seven soil and climate measurements (99.3% held-out accuracy). Every result shows the model's confidence and warns when inputs fall outside anything it was trained on. |
 | **Crop advisor** | Pick a crop and see each condition against that crop's optimal range, a 0–100 suitability score, and specific corrective actions (liming, irrigation, fertiliser, and so on). |
-| **Field monitoring** | Map fields, record readings by hand or simulate IoT sensor streams, and chart any measurement over time. |
+| **Field monitoring** | Map fields on a street or satellite map (pick a spot or use your phone's location), record readings by hand or simulate IoT sensor streams, and chart any measurement over time. |
 | **Crop tracking** | Follow each planting through its growth stages with guidance for the current stage, expected harvest date, and harvest and yield records. |
 | **Weather and climate feed** | Each mapped field syncs up to 10 years of daily weather from [Open-Meteo](https://open-meteo.com) plus a 7-day forecast. Recommendations can use recent weather or the typical climate for the season you plan to plant. |
 | **Sensor stations** | A low-cost ESP32 station (under M1,000, [build manual](docs/hardware/README.md)) posts air and soil readings every 15 minutes with its own API key. |
@@ -140,7 +140,7 @@ Lesotho**, Department of Mathematics and Computer Science (2025).
 - **Supervisor:** Mx. Mathe Ntšekhe · **Co-supervisor:** Dr. Lerato Lerato
 - **Agricultural domain expertise:** Ms. Moipone Sebitia
 - Crop dataset: [Crop Recommendation Dataset](https://www.kaggle.com/datasets/atharvaingle/crop-recommendation-dataset) (Kaggle)
-- Map data © [OpenStreetMap](https://www.openstreetmap.org/copyright) contributors
+- Maps: [MapLibre GL JS](https://maplibre.org); map tiles by [OpenFreeMap](https://openfreemap.org) © [OpenMapTiles](https://openmaptiles.org), data © [OpenStreetMap](https://www.openstreetmap.org/copyright) contributors; satellite imagery powered by Esri (Esri, Maxar, Earthstar Geographics and the GIS User Community). Map sources chosen with the help of [God's Eye View](https://github.com/bilawalsidhu/gods-eye-view)'s data-source catalogue.
 
 ## Licence
 
