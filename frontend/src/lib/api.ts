@@ -23,6 +23,7 @@ import type {
   Reading,
   Recommendation,
   RecommendationScope,
+  SoilDefaults,
   WhatsAppLinkCode,
   WhatsAppStatus,
   Token,
@@ -259,6 +260,11 @@ export const api = {
     request<Telemetry[]>(`/fields/${fieldId}/telemetry`, { query: { since } }),
   telemetrySummary: (fieldId: string, days = 7) =>
     request<SensorSummary>(`/fields/${fieldId}/telemetry/summary`, { query: { days } }),
+
+  soilDefaults: (latitude: number | null, longitude: number | null) =>
+    request<SoilDefaults>('/soil/defaults', {
+      query: latitude !== null && longitude !== null ? { latitude, longitude } : {},
+    }),
 
   whatsapp: () => request<WhatsAppStatus>('/whatsapp'),
   linkWhatsApp: () => request<WhatsAppLinkCode>('/whatsapp/link', { method: 'POST' }),

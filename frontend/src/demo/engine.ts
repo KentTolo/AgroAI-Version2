@@ -16,6 +16,7 @@ import type {
   Severity,
   Verdict,
 } from '@/lib/types'
+import type { SoilData } from './soil'
 
 /* ---------- Data files ---------- */
 
@@ -66,6 +67,7 @@ interface SeriesSpec {
 }
 
 export interface Knowledge {
+  soil: SoilData
   parameters: ParameterDef[]
   dataset_bounds: Record<ParameterKey, { min: number; max: number }>
   crops: CropDef[]

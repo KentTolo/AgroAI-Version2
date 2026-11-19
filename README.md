@@ -17,6 +17,7 @@ runs on Render's free tier, so the first request after a quiet spell takes up to
 |---|---|
 | **Crop recommendations** | A Random Forest model ranks crops from seven soil and climate measurements (99.3% held-out accuracy). By default it ranks only crops grown in Lesotho, and scores the staples it has no data for (sorghum, wheat, dry peas, potatoes) with the crop advisor. Every result shows the model's confidence and warns when inputs fall outside anything it was trained on. |
 | **Crop advisor** | Pick a crop and see each condition against that crop's optimal range, a 0–100 suitability score, and specific corrective actions (liming, irrigation, fertiliser, and so on). |
+| **Regional soil defaults** | Soil forms start from the typical pH, nitrogen, phosphorus and potassium within about 5 km of the field, from the open [iSDAsoil](https://www.isda-africa.com/isdasoil/) 30 m soil maps (CC BY 4.0), shown with their source and laboratory values. Farmers overwrite them with their own soil test or sensor readings. |
 | **Field monitoring** | Map fields on a street or satellite map (pick a spot or use your phone's location), record readings by hand or simulate IoT sensor streams, and chart any measurement over time. |
 | **Crop tracking** | Follow each planting through its growth stages with guidance for the current stage, expected harvest date, and harvest and yield records. |
 | **Weather and climate feed** | Each mapped field syncs up to 10 years of daily weather from [Open-Meteo](https://open-meteo.com) plus a 7-day forecast. Recommendations can use recent weather or the typical climate for the season you plan to plant. |
@@ -145,6 +146,7 @@ Lesotho**, Department of Mathematics and Computer Science (2025).
 - **Authors:** Tlotliso Khosi and Keketso Tolo
 - **Supervisor:** Mx. Mathe Ntšekhe · **Co-supervisor:** Dr. Lerato Lerato
 - **Agricultural domain expertise:** Ms. Moipone Sebitia
+- Soil data: iSDAsoil, Hengl et al. (2021), *African soil properties and nutrients mapped at 30 m spatial resolution using two-scale ensemble machine learning*, Scientific Reports 11, 6130 ([doi:10.1038/s41598-021-85639-y](https://doi.org/10.1038/s41598-021-85639-y)), CC BY 4.0; district boundaries from [Natural Earth](https://www.naturalearthdata.com)
 - Crop dataset: [Crop Recommendation Dataset](https://www.kaggle.com/datasets/atharvaingle/crop-recommendation-dataset) (Kaggle)
 - Maps: [MapLibre GL JS](https://maplibre.org); map tiles by [OpenFreeMap](https://openfreemap.org) © [OpenMapTiles](https://openmaptiles.org), data © [OpenStreetMap](https://www.openstreetmap.org/copyright) contributors; satellite imagery powered by Esri (Esri, Maxar, Earthstar Geographics and the GIS User Community). Map sources chosen with the help of [God's Eye View](https://github.com/bilawalsidhu/gods-eye-view)'s data-source catalogue.
 

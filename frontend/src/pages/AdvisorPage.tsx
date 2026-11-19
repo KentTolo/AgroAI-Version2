@@ -1,10 +1,12 @@
 import { CropOptions } from '@/components/CropOptions'
 import { useQuery } from '@tanstack/react-query'
 import { ClipboardCheck } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useSearchParams } from 'react-router'
 import { ClimateSource, type ClimateChoice } from '@/components/ClimateSource'
 import { ConditionsForm } from '@/components/ConditionsForm'
+import { SoilDefaultsPanel } from '@/components/SoilDefaultsPanel'
+import type { SoilPatch } from '@/lib/soil'
 import { AdvisoryResult } from '@/components/Results'
 import { Button } from '@/components/ui/Button'
 import { Card, CardBody, CardHeader } from '@/components/ui/Card'
@@ -26,6 +28,7 @@ export default function AdvisorPage() {
   const [manualValues, setValues] = useState<GrowingConditions | null>(null)
   const [fieldId, setFieldId] = useState('')
   const [climate, setClimate] = useState<ClimateChoice | null>(null)
+  const [soil, setSoil] = useState<SoilPatch | null>(null)
 
   // Arriving from a recommendation: reuse its conditions and run the assessment straight away.
   const fromId = params.get('from')
@@ -52,6 +55,10 @@ export default function AdvisorPage() {
 
   const allFields = fields.data?.items ?? []
   const selectedField = allFields.find((f) => f.id === fieldId)
+  const patch = useMemo(
+    () => (soil || climate ? { ...soil, ...climate?.patch } : null),
+    [soil, climate],
+  )
 
   return (
     <>
@@ -88,6 +95,7 @@ export default function AdvisorPage() {
                     disabled={allFields.length === 0}
                     onChange={(e) => {
                       setFieldId(e.target.value)
+                      setSoil(null)
                       setClimate(null)
                       const reading = allFields.find((f) => f.id === e.target.value)?.latest_reading
                       if (reading) setValues(pickConditions(reading))
@@ -109,10 +117,19 @@ export default function AdvisorPage() {
                 <ClimateSource key={selectedField.id} field={selectedField} onChange={setClimate} />
               </div>
             )}
+            <div className="mb-6">
+              <SoilDefaultsPanel
+                key={selectedField?.id ?? 'none'}
+                latitude={selectedField?.latitude ?? null}
+                longitude={selectedField?.longitude ?? null}
+                autoApply={Boolean(selectedField && !selectedField.latest_reading)}
+                onApply={setSoil}
+              />
+            </div>
             <ConditionsForm
               id="advisor-form"
               values={values}
-              patch={climate?.patch ?? null}
+              patch={patch}
               onSubmit={submit}
               footer={
                 <>

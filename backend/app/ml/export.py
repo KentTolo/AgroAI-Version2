@@ -30,6 +30,7 @@ from app.api.presenters import VERDICT_TEXT
 from app.core.config import get_settings
 from app.ml.features import FEATURES, PARAMETERS
 from app.ml.predictor import CropRecommender
+from app.services import soil
 from app.services.advisory import ADVICE, SEVERITY_SCORES
 from app.services.crops import get_catalog
 from app.services.growth import STAGE_TEMPLATES
@@ -131,6 +132,16 @@ def export_knowledge() -> dict[str, Any]:
         },
         "severity_scores": {str(k): v for k, v in SEVERITY_SCORES.items()},
         "verdict_text": VERDICT_TEXT,
+        "soil": {
+            **json.loads(soil.DATA_FILE.read_text(encoding="utf-8")),
+            "conversion": {
+                "source": soil.SOURCE,
+                "mineralisable_n_fraction": soil.MINERALISABLE_N_FRACTION,
+                "sufficient_potassium_ppm": soil.SUFFICIENT_POTASSIUM_PPM,
+                "training_median_potassium": soil.TRAINING_MEDIAN_POTASSIUM,
+                "search_radius": soil.SEARCH_RADIUS,
+            },
+        },
         "stage_templates": {
             lifecycle: [asdict(t) for t in templates]
             for lifecycle, templates in STAGE_TEMPLATES.items()

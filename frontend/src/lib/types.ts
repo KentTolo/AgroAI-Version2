@@ -353,3 +353,22 @@ export interface WhatsAppLinkCode {
   bot_number: string | null
   whatsapp_url: string | null
 }
+
+export interface SoilDefaults {
+  scope: 'local' | 'district' | 'national'
+  district: string | null
+  description: string
+  source: string
+  lab: {
+    ph: number
+    nitrogen_total_g_kg: number
+    phosphorus_ppm: number
+    potassium_ppm: number
+    bulk_density_g_cm3: number
+  }
+  nitrogen: number
+  phosphorus: number
+  potassium: number
+  ph: number
+  notes: string[]
+}

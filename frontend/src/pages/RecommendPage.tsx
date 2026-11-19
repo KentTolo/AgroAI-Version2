@@ -1,9 +1,11 @@
 import { ClipboardCheck, CloudSun, Info, RotateCcw, Sparkles, Sprout } from 'lucide-react'
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { Link, useSearchParams } from 'react-router'
 import { useQuery } from '@tanstack/react-query'
 import { ClimateSource, type ClimateChoice } from '@/components/ClimateSource'
 import { ConditionsForm } from '@/components/ConditionsForm'
+import { SoilDefaultsPanel } from '@/components/SoilDefaultsPanel'
+import type { SoilPatch } from '@/lib/soil'
 import { ConditionTiles, PredictionList, SuitabilityList } from '@/components/Results'
 import { confidenceLabel } from '@/lib/labels'
 import { Button, ButtonLink } from '@/components/ui/Button'
@@ -124,6 +126,7 @@ export default function RecommendPage() {
   const [manualValues, setValues] = useState<GrowingConditions | null>(null)
   const [climate, setClimate] = useState<ClimateChoice | null>(null)
   const [scope, setScope] = useState<RecommendationScope>('lesotho')
+  const [soil, setSoil] = useState<SoilPatch | null>(null)
 
   const saved = useQuery({
     queryKey: ['recommendations', 'one', resultId],
@@ -138,6 +141,7 @@ export default function RecommendPage() {
   const onFieldChange = (id: string) => {
     setFieldId(id)
     setClimate(null)
+    setSoil(null)
     const reading = selectableFields.find((f) => f.id === id)?.latest_reading
     if (reading) setValues(pickConditions(reading))
   }
@@ -149,6 +153,10 @@ export default function RecommendPage() {
     )
 
   const selectedField = selectableFields.find((f) => f.id === fieldId)
+  const patch = useMemo(
+    () => (soil || climate ? { ...soil, ...climate?.patch } : null),
+    [soil, climate],
+  )
 
   return (
     <>
@@ -194,10 +202,19 @@ export default function RecommendPage() {
                 <ClimateSource key={selectedField.id} field={selectedField} onChange={setClimate} />
               </div>
             )}
+            <div className="mb-6">
+              <SoilDefaultsPanel
+                key={selectedField?.id ?? 'none'}
+                latitude={selectedField?.latitude ?? null}
+                longitude={selectedField?.longitude ?? null}
+                autoApply={Boolean(selectedField && !selectedField.latest_reading)}
+                onApply={setSoil}
+              />
+            </div>
             <ConditionsForm
               id="recommend-form"
               values={values}
-              patch={climate?.patch ?? null}
+              patch={patch}
               onSubmit={submit}
               footer={
                 <>

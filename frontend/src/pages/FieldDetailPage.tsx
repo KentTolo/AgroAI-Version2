@@ -13,6 +13,8 @@ import { CropOptions } from '@/components/CropOptions'
 import { useMemo, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router'
 import { ConditionsForm } from '@/components/ConditionsForm'
+import { SoilDefaultsPanel } from '@/components/SoilDefaultsPanel'
+import type { SoilPatch } from '@/lib/soil'
 import { CycleCard } from '@/components/CycleCard'
 import { FieldForm } from '@/components/FieldForm'
 import { FieldMap } from '@/components/FieldMap'
@@ -70,6 +72,7 @@ function ReadingsSection({ field }: { field: Field }) {
   }, [range])
   const readings = useReadings(field.id, since)
   const [addOpen, setAddOpen] = useState(false)
+  const [soilPatch, setSoilPatch] = useState<SoilPatch | null>(null)
   const [clearOpen, setClearOpen] = useState(false)
   const add = useAddReading(field.id)
   const simulate = useSimulateReadings(field.id)
@@ -183,8 +186,17 @@ function ReadingsSection({ field }: { field: Field }) {
         }
       >
         {add.error && <Alert tone="danger" className="mb-4">{add.error.message}</Alert>}
+        <div className="mb-5">
+          <SoilDefaultsPanel
+            latitude={field.latitude}
+            longitude={field.longitude}
+            autoApply={!field.latest_reading}
+            onApply={setSoilPatch}
+          />
+        </div>
         <ConditionsForm
           id="add-reading"
+          patch={soilPatch}
           defaultValues={field.latest_reading ? pickConditions(field.latest_reading) : undefined}
           onSubmit={(values) => add.mutate(values, { onSuccess: () => setAddOpen(false) })}
         />

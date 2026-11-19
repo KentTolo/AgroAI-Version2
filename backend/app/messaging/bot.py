@@ -27,6 +27,7 @@ from app.schemas.common import GrowingConditions
 from app.services.advisory import assess
 from app.services.crops import CropCatalog, CropInfo, normalise_crop
 from app.services.growth import compute_progress
+from app.services.soil import soil_defaults
 from app.services.weather import WeatherClient, WeatherUnavailableError, recent_summaries
 
 LINK_CODE_TTL = timedelta(minutes=30)
@@ -309,11 +310,31 @@ def cmd_recommend(ctx: BotContext, user: User, args: list[str]) -> str:
         .order_by(SensorReading.recorded_at.desc())
         .limit(1)
     )
-    if latest is None:
-        return f"{item.name} has no soil test yet. Send *SOIL {number} N P K pH* first."
     if ctx.recommender is None:
         return "Recommendations are not available right now."
-    inputs = GrowingConditions.model_validate(latest).model_dump()
+    if latest is not None:
+        inputs = GrowingConditions.model_validate(latest).model_dump()
+        basis = f"soil test {latest.recorded_at:%d %b}"
+    else:
+        # No soil test yet: typical soil for the spot, with the field's recent weather.
+        days = list(ctx.db.scalars(select(WeatherDay).where(WeatherDay.field_id == item.id)))
+        recent = next(iter(recent_summaries(days, windows=(30,))), None)
+        if recent is None or recent.humidity is None:
+            return (
+                f"{item.name} has no soil test or weather data yet. Send "
+                f"*SOIL {number} N P K pH*, or sync the field's weather on the website."
+            )
+        soil = soil_defaults(item.latitude, item.longitude)
+        inputs = {
+            "nitrogen": soil.nitrogen,
+            "phosphorus": soil.phosphorus,
+            "potassium": soil.potassium,
+            "ph": soil.ph,
+            "temperature": recent.temperature,
+            "humidity": recent.humidity,
+            "rainfall": recent.rainfall,
+        }
+        basis = "typical soil for the area – send SOIL for your own test"
     ranked = ctx.recommender.rank(inputs)
     overall_best = ranked[0].crop
     lesotho = [
@@ -331,7 +352,7 @@ def cmd_recommend(ctx: BotContext, user: User, args: list[str]) -> str:
         )
     )
     ctx.db.commit()
-    lines = [f"*Best crops for {item.name}* (soil test {latest.recorded_at:%d %b})"]
+    lines = [f"*Best crops for {item.name}* ({basis})"]
     for i, s in enumerate(lesotho, start=1):
         crop = ctx.catalog.get(s.crop)
         lines.append(f"{i}. {crop.name if crop else s.crop} – {s.probability:.0%} match")

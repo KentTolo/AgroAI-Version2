@@ -38,6 +38,7 @@ import {
   type Knowledge,
 } from './engine'
 import { DEMO_EMAIL, DEMO_PASSWORD } from './credentials'
+import { soilDefaults } from './soil'
 
 const STORE_KEY = 'agroai.demo.v1'
 
@@ -351,6 +352,12 @@ export async function handleDemoRequest({ method, path, token, body, form, query
     user!.last_login_at = now()
     save(db)
     return { access_token: session, token_type: 'bearer', expires_in: 7 * 86_400 }
+  }
+  if (route === 'GET /soil/defaults') {
+    const lat = q('latitude')
+    const lon = q('longitude')
+    const bounds = knowledge.dataset_bounds as Parameters<typeof soilDefaults>[1]
+    return soilDefaults(knowledge.soil, bounds, lat === undefined ? null : Number(lat), lon === undefined ? null : Number(lon))
   }
   if (route === 'GET /crops') {
     return crops.map((c) => cropRead(c))

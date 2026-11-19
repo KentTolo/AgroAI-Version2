@@ -159,6 +159,9 @@ def test_bot_commands(
     incoming(client, "SOIL 1 80 45 20 6.2")
     assert "no recent weather data" in last_reply(sender)
     client.post(f"/api/v1/fields/{field_id}/weather/sync", json={"years": 1}, headers=auth)
+    # Before any soil test, RECOMMEND uses typical soil for the area.
+    incoming(client, "recommend")
+    assert "typical soil for the area" in last_reply(sender)
     incoming(client, "SOIL 1 80 45 20 6.2")
     assert "Saved a soil test for North plot" in last_reply(sender)
     incoming(client, "soil 1 80 45 20 6,4 21 60 85")
@@ -173,7 +176,7 @@ def test_bot_commands(
     assert reply.startswith("*Best crops for North plot*")
     assert "Also suitable:" in reply
     history = client.get("/api/v1/recommendations", headers=auth).json()
-    assert history["total"] == 1
+    assert history["total"] == 2
     assert history["items"][0]["scope"] == "lesotho"
 
     incoming(client, "weather")

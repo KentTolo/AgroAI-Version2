@@ -53,6 +53,7 @@ Send the token as `Authorization: Bearer <token>` on every other request marked 
 | POST | `/whatsapp/webhook` | Incoming messages from WAHA (HMAC-SHA512 signed), answered by the bot |
 | POST | `/internal/notifications/run` | Sends the day's alerts (header `X-Cron-Secret`; called by GitHub Actions) |
 | GET | `/admin/overview`, `/admin/users` 🔒 | System-wide usage (admins only) |
+| GET | `/soil/defaults` | Typical topsoil pH, N, P, K near `latitude`, `longitude` in Lesotho (iSDAsoil), in model units with the laboratory values |
 | GET | `/crops`, `/crops/{slug}` | Crop catalogue with optimal condition ranges |
 | GET | `/model` | Version and metrics of the serving model |
 | GET | `/health`, `/health/ready` | Liveness and readiness (outside `/api/v1`) |
