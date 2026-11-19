@@ -36,6 +36,8 @@ client.
 ## Data model
 
 ```
+users 1──* notifications            (WhatsApp alerts sent, one row per milestone)
+  │
 users 1──* fields 1──* sensor_readings
   │           ├──* crop_cycles
   │           ├──* weather_days        (daily history from Open-Meteo)
@@ -80,4 +82,6 @@ database and model and returns 503 when either is unavailable.
 | Synchronous SQLAlchemy | Request handlers are short and CPU-light; sync code is simpler to reason about and FastAPI runs it in a thread pool. |
 | Separate telemetry for stations | Stations measure different things from a soil test (air, soil moisture), with every value optional, so they post to `/telemetry` with a per-device key instead of a user's login. |
 | Weather stored, not fetched per request | History is synced incrementally into `weather_days`, so climate summaries are fast and keep working if the provider is briefly unavailable or rate-limited. |
+| WhatsApp through self-hosted WAHA | Free and open source, as the pilot requires. The bot and the daily run sit behind a small `WhatsAppSender` interface (`app/services/whatsapp.py`), so switching to the official Cloud API later means one new sender class. Webhooks are verified with HMAC-SHA512, numbers are linked only by messaging a one-time code from the phone, and each milestone has a stable key so it is sent once. |
+| Scheduled work on GitHub Actions | Render's free plan has no cron and sleeps when idle; a daily Action calls a secret-protected endpoint, which also wakes the API. |
 | Admins from configuration | `AGROAI_ADMIN_EMAILS` names the admins; no admin password is generated, stored or shared. |

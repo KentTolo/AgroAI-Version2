@@ -3,6 +3,7 @@
 from app.models.crop_cycle import CropCycle, CycleStatus
 from app.models.device import Device, Telemetry
 from app.models.field import Field
+from app.models.notification import Notification, NotificationStatus
 from app.models.reading import ReadingSource, SensorReading
 from app.models.recommendation import Recommendation
 from app.models.user import User
@@ -13,6 +14,8 @@ __all__ = [
     "CycleStatus",
     "Device",
     "Field",
+    "Notification",
+    "NotificationStatus",
     "ReadingSource",
     "Recommendation",
     "SensorReading",

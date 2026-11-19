@@ -48,6 +48,10 @@ Send the token as `Authorization: Bearer <token>` on every other request marked 
 | DELETE | `/devices/{id}` 🔒 | Remove a station and its readings |
 | POST | `/telemetry` | Station readings, authenticated with the `X-Device-Key` header |
 | GET | `/fields/{id}/telemetry`, `/fields/{id}/telemetry/summary` 🔒 | Station readings and recent averages |
+| GET · PATCH · DELETE | `/whatsapp` 🔒 | WhatsApp link status, recent alerts, alerts on/off, unlink |
+| POST | `/whatsapp/link` 🔒 | One-time code the farmer sends to the bot to link their number |
+| POST | `/whatsapp/webhook` | Incoming messages from WAHA (HMAC-SHA512 signed), answered by the bot |
+| POST | `/internal/notifications/run` | Sends the day's alerts (header `X-Cron-Secret`; called by GitHub Actions) |
 | GET | `/admin/overview`, `/admin/users` 🔒 | System-wide usage (admins only) |
 | GET | `/crops`, `/crops/{slug}` | Crop catalogue with optimal condition ranges |
 | GET | `/model` | Version and metrics of the serving model |

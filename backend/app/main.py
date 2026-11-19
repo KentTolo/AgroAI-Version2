@@ -22,6 +22,7 @@ from app.api.routes import (
     health,
     users,
     weather,
+    whatsapp,
 )
 from app.core.config import Settings, get_settings
 from app.core.logging import configure_logging
@@ -96,7 +97,18 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         return response
 
     api = APIRouter(prefix=settings.api_v1_prefix)
-    for module in (auth, users, fields, weather, devices, cycles, agronomy, dashboard, admin):
+    for module in (
+        auth,
+        users,
+        fields,
+        weather,
+        devices,
+        cycles,
+        agronomy,
+        dashboard,
+        admin,
+        whatsapp,
+    ):
         api.include_router(module.router)
     app.include_router(api)
     app.include_router(health.router)

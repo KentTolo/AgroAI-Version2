@@ -23,6 +23,8 @@ import type {
   Reading,
   Recommendation,
   RecommendationScope,
+  WhatsAppLinkCode,
+  WhatsAppStatus,
   Token,
   User,
 } from './types'
@@ -257,6 +259,11 @@ export const api = {
     request<Telemetry[]>(`/fields/${fieldId}/telemetry`, { query: { since } }),
   telemetrySummary: (fieldId: string, days = 7) =>
     request<SensorSummary>(`/fields/${fieldId}/telemetry/summary`, { query: { days } }),
+
+  whatsapp: () => request<WhatsAppStatus>('/whatsapp'),
+  linkWhatsApp: () => request<WhatsAppLinkCode>('/whatsapp/link', { method: 'POST' }),
+  updateWhatsApp: (input: { alerts: boolean }) => request<WhatsAppStatus>('/whatsapp', { method: 'PATCH', body: input }),
+  unlinkWhatsApp: () => request<void>('/whatsapp', { method: 'DELETE' }),
 
   adminOverview: () => request<AdminOverview>('/admin/overview'),
   adminUsers: () => request<AdminUserRow[]>('/admin/users'),

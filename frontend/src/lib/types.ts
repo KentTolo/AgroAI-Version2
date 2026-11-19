@@ -329,3 +329,27 @@ export interface AdminUserRow {
   devices: number
   recommendations: number
 }
+
+export interface WhatsAppNotification {
+  kind: string
+  message: string
+  status: 'sent' | 'failed'
+  created_at: string
+}
+
+export interface WhatsAppStatus {
+  enabled: boolean
+  bot_number: string | null
+  linked_number: string | null
+  alerts: boolean
+  link_expires_at: string | null
+  recent: WhatsAppNotification[]
+}
+
+export interface WhatsAppLinkCode {
+  code: string
+  message: string
+  expires_at: string
+  bot_number: string | null
+  whatsapp_url: string | null
+}

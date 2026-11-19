@@ -10,6 +10,7 @@ import { ConfirmDialog } from '@/components/ui/Dialog'
 import { Alert } from '@/components/ui/Feedback'
 import { FormField, Input } from '@/components/ui/Form'
 import { PageHeader } from '@/components/ui/Page'
+import { WhatsAppCard } from '@/components/WhatsAppCard'
 import { api } from '@/lib/api'
 import { formatDate } from '@/lib/format'
 import { keys, useModelInfo } from '@/lib/queries'
@@ -177,9 +178,10 @@ function AboutModel() {
 export default function SettingsPage() {
   return (
     <>
-      <PageHeader title="Settings" description="Manage your profile and account." />
+      <PageHeader title="Settings" description="Manage your profile, WhatsApp alerts and account." />
       <div className="grid max-w-3xl gap-6">
         <ProfileCard />
+        <WhatsAppCard />
         <PasswordCard />
         <AboutModel />
         <DangerZone />

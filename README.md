@@ -21,6 +21,7 @@ runs on Render's free tier, so the first request after a quiet spell takes up to
 | **Crop tracking** | Follow each planting through its growth stages with guidance for the current stage, expected harvest date, and harvest and yield records. |
 | **Weather and climate feed** | Each mapped field syncs up to 10 years of daily weather from [Open-Meteo](https://open-meteo.com) plus a 7-day forecast. Recommendations can use recent weather or the typical climate for the season you plan to plant. |
 | **Sensor stations** | A low-cost ESP32 station (under M1,000, [build manual](docs/hardware/README.md)) posts air and soil readings every 15 minutes with its own API key. |
+| **WhatsApp alerts and bot** | Daily growth-stage, harvest, frost and heavy-rain alerts, and a chat bot for soil tests, plantings, harvests, weather and recommendations, so farmers can work from WhatsApp. Runs free on self-hosted [WAHA](https://github.com/devlikeapro/waha) ([setup](docs/deployment/whatsapp.md)). |
 | **Admin dashboard** | Accounts listed in `AGROAI_ADMIN_EMAILS` see system-wide usage: users, fields, stations and recommendations. |
 | **History** | Every recommendation is stored with its inputs, climate basis and the model version that produced it. |
 
@@ -118,6 +119,7 @@ cleanly, retrains the model, and builds both Docker images.
 ## Documentation
 
 - [Pilot deployment](docs/deployment/pilot.md): go live on Supabase, Render and GitHub Pages (free tiers)
+- [WhatsApp alerts and bot](docs/deployment/whatsapp.md): free self-hosted WhatsApp gateway, daily alerts and bot commands
 - [Sensor station manual](docs/hardware/README.md): parts list, wiring, firmware, calibration and installation
 - [Architecture](docs/architecture.md): components, data model, request flow and design decisions
 - [Model card](docs/model-card.md): data, training, evaluation, limitations and intended use

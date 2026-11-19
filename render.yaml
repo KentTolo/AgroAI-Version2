@@ -27,3 +27,17 @@ services:
         value: https://kenttolo.github.io
       - key: AGROAI_LOG_LEVEL
         value: INFO
+      # WhatsApp via self-hosted WAHA (docs/deployment/whatsapp.md). Leave unset to turn it off.
+      - key: AGROAI_WHATSAPP_PROVIDER
+        sync: false
+      - key: AGROAI_WAHA_URL
+        sync: false
+      - key: AGROAI_WAHA_API_KEY
+        sync: false
+      - key: AGROAI_WAHA_WEBHOOK_HMAC_KEY
+        sync: false
+      - key: AGROAI_WHATSAPP_BOT_NUMBER
+        sync: false
+      # Shared with the "Daily WhatsApp alerts" GitHub Action (secret AGROAI_CRON_SECRET).
+      - key: AGROAI_CRON_SECRET
+        sync: false

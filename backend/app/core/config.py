@@ -45,6 +45,21 @@ class Settings(BaseSettings):
     # Optional key for Open-Meteo's paid API (with its customer-* URLs). The free tier needs none.
     weather_api_key: SecretStr | None = None
 
+    # WhatsApp (self-hosted WAHA, https://github.com/devlikeapro/waha). "none" turns it off;
+    # "log" only logs messages (development and tests).
+    whatsapp_provider: Literal["none", "log", "waha"] = "none"
+    waha_url: str = "http://localhost:3000"
+    waha_api_key: SecretStr | None = None
+    waha_session: str = "default"
+    # WAHA signs webhooks with this key (WHATSAPP_HOOK_HMAC_KEY on the WAHA side).
+    waha_webhook_hmac_key: SecretStr | None = None
+    # The bot's own number, shown to farmers so they know where to message (digits only).
+    whatsapp_bot_number: str | None = None
+    # Pause between outgoing messages, to look less like a bulk sender.
+    whatsapp_send_delay_seconds: float = Field(default=3, ge=0, le=60)
+    # Shared secret for the scheduled notification run (sent as X-Cron-Secret).
+    cron_secret: SecretStr | None = None
+
     artifacts_dir: Path = BACKEND_DIR / "artifacts"
     dataset_path: Path = BACKEND_DIR / "data" / "crop_recommendation.csv"
 
