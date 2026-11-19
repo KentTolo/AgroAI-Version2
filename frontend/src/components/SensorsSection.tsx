@@ -31,6 +31,14 @@ function sevenDaysAgo() {
   return new Date(Date.now() - 7 * 86_400_000).toISOString().slice(0, 13) + ':00:00Z'
 }
 
+/** Rough Wi-Fi quality bands for an ESP32. */
+function signalLabel(rssi: number) {
+  if (rssi >= -60) return 'strong'
+  if (rssi >= -72) return 'good'
+  if (rssi >= -82) return 'weak'
+  return 'very weak'
+}
+
 function status(device: Device) {
   if (!device.last_seen_at) return { label: 'Waiting for first reading', tone: 'neutral' as const }
   const online = Date.now() - new Date(device.last_seen_at).getTime() < ONLINE_WINDOW_MS
@@ -167,6 +175,7 @@ function DeviceRow({ device, fieldId }: { device: Device; fieldId: string }) {
             <p className="font-semibold">{device.name}</p>
             <p className="text-xs text-fg-subtle">
               Key {device.key_prefix}… · added {formatRelative(device.created_at)}
+              {latest?.signal_strength != null && ` · Wi-Fi ${latest.signal_strength} dBm (${signalLabel(latest.signal_strength)})`}
             </p>
           </div>
         </div>

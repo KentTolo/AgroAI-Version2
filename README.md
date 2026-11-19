@@ -19,7 +19,10 @@ each one, and tracks every planting from sowing to harvest.
 | **Crop advisor** | Pick a crop and see each condition against that crop's optimal range, a 0–100 suitability score, and specific corrective actions (liming, irrigation, fertiliser, and so on). |
 | **Field monitoring** | Map fields, record readings by hand or simulate IoT sensor streams, and chart any measurement over time. |
 | **Crop tracking** | Follow each planting through its growth stages with guidance for the current stage, expected harvest date, and harvest and yield records. |
-| **History** | Every recommendation is stored with its inputs and the model version that produced it. |
+| **Weather and climate feed** | Each mapped field syncs up to 10 years of daily weather from [Open-Meteo](https://open-meteo.com) plus a 7-day forecast. Recommendations can use recent weather or the typical climate for the season you plan to plant. |
+| **Sensor stations** | A low-cost ESP32 station (under M1,000, [build manual](docs/hardware/README.md)) posts air and soil readings every 15 minutes with its own API key. |
+| **Admin dashboard** | Accounts listed in `AGROAI_ADMIN_EMAILS` see system-wide usage: users, fields, stations and recommendations. |
+| **History** | Every recommendation is stored with its inputs, climate basis and the model version that produced it. |
 
 <table>
   <tr>
@@ -91,6 +94,7 @@ backend/            FastAPI service (Python)
   app/models/       SQLAlchemy models          app/schemas/   Pydantic request/response schemas
   app/data/         Crop metadata and data-derived condition profiles
   alembic/          Database migrations        tests/         pytest suite
+firmware/           ESP32 sensor station firmware (Arduino / PlatformIO)
 frontend/           React + TypeScript single-page app (Vite, Tailwind CSS)
   src/demo/         In-browser API used by the GitHub Pages demo
   src/pages/        Screens                    src/components/  UI kit and domain components
@@ -112,6 +116,8 @@ cleanly, retrains the model, and builds both Docker images.
 
 ## Documentation
 
+- [Pilot deployment](docs/deployment/pilot.md): go live on Supabase, Render and GitHub Pages (free tiers)
+- [Sensor station manual](docs/hardware/README.md): parts list, wiring, firmware, calibration and installation
 - [Architecture](docs/architecture.md): components, data model, request flow and design decisions
 - [Model card](docs/model-card.md): data, training, evaluation, limitations and intended use
 - [API reference](docs/api.md): endpoints at a glance (the full schema is served at `/docs`)

@@ -1,0 +1,3 @@
+# Your Wi-Fi password and device key live here: never commit it.
+agroai_station/config.h
+.pio/

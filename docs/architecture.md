@@ -36,8 +36,9 @@ client.
 
 ```
 users 1──* fields 1──* sensor_readings
-  │           │
-  │           └──* crop_cycles
+  │           ├──* crop_cycles
+  │           ├──* weather_days        (daily history from Open-Meteo)
+  │           └──* devices 1──* telemetry
   └──* recommendations *──0..1 fields   (SET NULL when a field is deleted)
 ```
 
@@ -75,4 +76,6 @@ database and model and returns 503 when either is unavailable.
 | Rule-based advisory derived from data | The original project's hand-picked single "ideal" values (and a ±5 mm rainfall tolerance) were replaced by per-crop percentile bands computed from the dataset, so advice is consistent with what the model learned. |
 | Latitude/longitude columns instead of PostGIS | The app only needs points; plain columns keep deployment simple. PostGIS can be added when boundary polygons are needed. |
 | Synchronous SQLAlchemy | Request handlers are short and CPU-light; sync code is simpler to reason about and FastAPI runs it in a thread pool. |
-| Simulated sensors behind the same readings API | Real IoT devices can post to `POST /fields/{id}/readings` with `source=device` later, with no other changes. |
+| Separate telemetry for stations | Stations measure different things from a soil test (air, soil moisture), with every value optional, so they post to `/telemetry` with a per-device key instead of a user's login. |
+| Weather stored, not fetched per request | History is synced incrementally into `weather_days`, so climate summaries are fast and keep working if the provider is briefly unavailable or rate-limited. |
+| Admins from configuration | `AGROAI_ADMIN_EMAILS` names the admins; no admin password is generated, stored or shared. |

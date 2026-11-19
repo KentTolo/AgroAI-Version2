@@ -39,6 +39,16 @@ Send the token as `Authorization: Bearer <token>` on every other request marked 
 | GET | `/recommendations` 🔒 | Recommendation history (`field_id`, `limit`, `offset`) |
 | GET · DELETE | `/recommendations/{id}` 🔒 | Read or delete one recommendation |
 | POST | `/advisory` 🔒 | Assess one crop against conditions, with advice |
+| GET | `/fields/{id}/weather/forecast` 🔒 | Live daily forecast (1–16 days) for the field's location |
+| POST | `/fields/{id}/weather/sync` 🔒 | Download missing daily history (`years`, 1–10) from Open-Meteo |
+| GET | `/fields/{id}/weather` 🔒 | Stored daily history (`since`, `until`) |
+| GET | `/fields/{id}/weather/climate` 🔒 | Recent windows, monthly normals and a season (`season_start`, `season_months`) |
+| GET · POST | `/fields/{id}/devices` 🔒 | List or register sensor stations (registration returns the key once) |
+| POST | `/devices/{id}/rotate-key` 🔒 | Issue a new station key |
+| DELETE | `/devices/{id}` 🔒 | Remove a station and its readings |
+| POST | `/telemetry` | Station readings, authenticated with the `X-Device-Key` header |
+| GET | `/fields/{id}/telemetry`, `/fields/{id}/telemetry/summary` 🔒 | Station readings and recent averages |
+| GET | `/admin/overview`, `/admin/users` 🔒 | System-wide usage (admins only) |
 | GET | `/crops`, `/crops/{slug}` | Crop catalogue with optimal condition ranges |
 | GET | `/model` | Version and metrics of the serving model |
 | GET | `/health`, `/health/ready` | Liveness and readiness (outside `/api/v1`) |
