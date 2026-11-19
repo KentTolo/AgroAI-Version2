@@ -31,6 +31,12 @@ class CropRead(Schema):
     lifecycle: Literal["annual", "perennial"]
     days_to_harvest: int
     description: str
+    lesotho: Literal["staple", "common", "possible", "unsuitable"] = Field(
+        description="How widely the crop is grown in Lesotho; the catalogue lists staples first"
+    )
+    model_ranked: bool = Field(
+        description="False when the model has no training data for the crop (advisor only)"
+    )
     requirements: dict[str, ParameterRange]
 
 
@@ -50,6 +56,10 @@ class RecommendationRequest(Schema):
         max_length=200,
         description="Where the climate values came from, e.g. 'Typical Oct–Jan (Open-Meteo)'",
     )
+    scope: Literal["lesotho", "all"] = Field(
+        default="lesotho",
+        description="'lesotho' ranks only crops grown in Lesotho; 'all' ranks every model crop",
+    )
 
     @model_validator(mode="after")
     def _needs_input(self) -> RecommendationRequest:
@@ -62,6 +72,16 @@ class CropPrediction(Schema):
     crop: str
     name: str
     probability: float = Field(ge=0, le=1)
+    grown_in_lesotho: bool = True
+
+
+class CropSuitability(Schema):
+    """A Lesotho crop the model cannot rank, scored by the rule-based crop advisor instead."""
+
+    crop: str
+    name: str
+    score: int = Field(ge=0, le=100)
+    verdict: Verdict
 
 
 class RecommendationRead(Schema):
@@ -73,6 +93,11 @@ class RecommendationRead(Schema):
     predictions: list[CropPrediction]
     model_version: str
     climate_basis: str | None = None
+    scope: Literal["lesotho", "all"] = "all"
+    also_consider: list[CropSuitability] = Field(
+        default_factory=list,
+        description="Lesotho staples outside the model's training data, scored by the advisor",
+    )
     warnings: list[str] = Field(default_factory=list)
 
 

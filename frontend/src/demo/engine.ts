@@ -6,10 +6,13 @@
 
 import type {
   Advisory,
+  CropSuitability,
   CycleProgress,
   GrowingConditions,
+  LesothoStatus,
   ParameterAssessment,
   ParameterKey,
+  RecommendationScope,
   Severity,
   Verdict,
 } from '@/lib/types'
@@ -43,6 +46,8 @@ export interface CropDef {
   lifecycle: 'annual' | 'perennial'
   days_to_harvest: number
   description: string
+  lesotho: LesothoStatus
+  model_ranked: boolean
   profile: Record<ParameterKey, Record<'min' | 'max' | 'mean' | 'p10' | 'p25' | 'median' | 'p75' | 'p90', number>>
 }
 
@@ -109,6 +114,31 @@ export function rankCrops(model: ForestModel, conditions: GrowingConditions) {
   return predictProba(model, row)
     .map((probability, i) => ({ crop: model.classes[i] as string, probability }))
     .sort((a, b) => b.probability - a.probability)
+}
+
+/** Mirrors the API's recommendation scope: 'lesotho' keeps only crops grown in Lesotho. */
+export function rankForScope(
+  knowledge: Knowledge,
+  model: ForestModel,
+  conditions: GrowingConditions,
+  scope: RecommendationScope,
+  topK: number,
+) {
+  const all = rankCrops(model, conditions)
+  const grown = new Set(knowledge.crops.filter((c) => c.lesotho !== 'unsuitable').map((c) => c.slug))
+  const ranked = scope === 'lesotho' ? all.filter((s) => grown.has(s.crop)) : all
+  return { ranked: ranked.slice(0, topK), overallBest: all[0]?.crop ?? '' }
+}
+
+/** Lesotho crops the model cannot rank, scored by the advisor, best first (as the API does). */
+export function alsoConsider(knowledge: Knowledge, conditions: GrowingConditions): CropSuitability[] {
+  return knowledge.crops
+    .filter((c) => c.lesotho !== 'unsuitable' && !c.model_ranked)
+    .map((c) => {
+      const a = assess(knowledge, c, conditions, null)
+      return { crop: c.slug, name: c.name, score: a.score, verdict: a.verdict }
+    })
+    .sort((a, b) => b.score - a.score)
 }
 
 /* ---------- Helpers ---------- */

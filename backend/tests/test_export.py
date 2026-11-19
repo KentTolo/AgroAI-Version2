@@ -26,7 +26,9 @@ def test_encoded_forest_matches_scikit_learn(artifacts_dir: Path) -> None:
 
 def test_knowledge_export_is_complete() -> None:
     knowledge = export_knowledge()
-    assert len(knowledge["crops"]) == 22
+    assert len(knowledge["crops"]) == 26
+    sorghum = next(c for c in knowledge["crops"] if c["slug"] == "sorghum")
+    assert (sorghum["lesotho"], sorghum["model_ranked"]) == ("staple", False)
     assert set(knowledge["advice"]) == set(FEATURES)
     assert knowledge["advice"]["ph"]["increase"]["significant"]
     assert {"annual", "perennial"} == set(knowledge["stage_templates"])

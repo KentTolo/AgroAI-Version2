@@ -3,7 +3,8 @@ import { ArrowDown, ArrowUp, Check } from 'lucide-react'
 import { formatNumber, formatPercent } from '@/lib/format'
 import { PARAMETERS } from '@/lib/parameters'
 import { SEVERITY, VERDICTS } from '@/lib/labels'
-import type { Advisory, CropPrediction, GrowingConditions, ParameterAssessment } from '@/lib/types'
+import { Link } from 'react-router'
+import type { Advisory, CropPrediction, CropSuitability, GrowingConditions, ParameterAssessment } from '@/lib/types'
 import { Badge } from './ui/Feedback'
 
 /* ---------- Ranked predictions ---------- */
@@ -17,6 +18,11 @@ export function PredictionList({ predictions }: { predictions: CropPrediction[] 
             <span className="font-medium text-fg">
               <span className="mr-2 text-fg-subtle tabular-nums">{index + 1}.</span>
               {p.name}
+              {!p.grown_in_lesotho && (
+                <Badge tone="neutral" className="ml-2 align-middle">
+                  Not grown in Lesotho
+                </Badge>
+              )}
             </span>
             <span className="text-fg-muted tabular-nums">{formatPercent(p.probability)}</span>
           </div>
@@ -29,6 +35,31 @@ export function PredictionList({ predictions }: { predictions: CropPrediction[] 
         </li>
       ))}
     </ol>
+  )
+}
+
+/** Lesotho crops outside the model's data, scored by the crop advisor. */
+export function SuitabilityList({ items, from }: { items: CropSuitability[]; from?: string }) {
+  return (
+    <ul className="divide-y divide-line rounded-lg border border-line">
+      {items.map((c) => {
+        const verdict = VERDICTS[c.verdict]
+        return (
+          <li key={c.crop}>
+            <Link
+              to={`/app/advisor?crop=${c.crop}${from ? `&from=${from}` : ''}`}
+              className="flex items-center justify-between gap-3 px-3 py-2.5 text-sm hover:bg-surface-muted"
+            >
+              <span className="font-medium text-fg">{c.name}</span>
+              <span className="flex items-center gap-2">
+                <Badge tone={verdict.tone}>{verdict.label}</Badge>
+                <span className="w-14 text-right text-fg-muted tabular-nums">{c.score}/100</span>
+              </span>
+            </Link>
+          </li>
+        )
+      })}
+    </ul>
   )
 }
 

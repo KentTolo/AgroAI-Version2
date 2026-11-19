@@ -15,7 +15,7 @@ runs on Render's free tier, so the first request after a quiet spell takes up to
 
 | | |
 |---|---|
-| **Crop recommendations** | A Random Forest model ranks 22 crops from seven soil and climate measurements (99.3% held-out accuracy). Every result shows the model's confidence and warns when inputs fall outside anything it was trained on. |
+| **Crop recommendations** | A Random Forest model ranks crops from seven soil and climate measurements (99.3% held-out accuracy). By default it ranks only crops grown in Lesotho, and scores the staples it has no data for (sorghum, wheat, dry peas, potatoes) with the crop advisor. Every result shows the model's confidence and warns when inputs fall outside anything it was trained on. |
 | **Crop advisor** | Pick a crop and see each condition against that crop's optimal range, a 0–100 suitability score, and specific corrective actions (liming, irrigation, fertiliser, and so on). |
 | **Field monitoring** | Map fields on a street or satellite map (pick a spot or use your phone's location), record readings by hand or simulate IoT sensor streams, and chart any measurement over time. |
 | **Crop tracking** | Follow each planting through its growth stages with guidance for the current stage, expected harvest date, and harvest and yield records. |
@@ -128,7 +128,11 @@ cleanly, retrains the model, and builds both Docker images.
 
 AgroAI is decision support, not a substitute for local agronomic expertise. The model is trained
 on a public dataset that is not specific to Lesotho and includes tropical crops (coconut, coffee,
-jute) that are unsuitable for most of the country. See the [model card](docs/model-card.md) for
+jute) that are unsuitable for most of the country. These are tagged "not suited to Lesotho" and left
+out of recommendations by default. Lesotho staples missing from the dataset (sorghum, wheat, dry
+peas, potatoes) use approximate ranges from published guides
+([`crop_profiles_literature.json`](backend/app/data/crop_profiles_literature.json)) and are
+scored by the advisor, not the model. See the [model card](docs/model-card.md) for
 details.
 
 ## Credits

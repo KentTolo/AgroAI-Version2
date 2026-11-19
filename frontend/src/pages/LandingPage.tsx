@@ -80,7 +80,7 @@ const CAPABILITIES = [
   {
     kicker: '01 · Recommend',
     title: 'Ranked crops, honest confidence',
-    body: 'A Random Forest model weighs seven soil and climate factors against 22 crops and tells you how sure it is, including when your conditions are unusual.',
+    body: 'A Random Forest model weighs seven soil and climate factors, ranks the crops grown in Lesotho first and tells you how sure it is, including when your conditions are unusual.',
   },
   {
     kicker: '02 · Advise',

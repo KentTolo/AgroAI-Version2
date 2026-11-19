@@ -3,6 +3,7 @@ import { Link, useParams } from 'react-router'
 import { ButtonLink } from '@/components/ui/Button'
 import { Card, CardBody, CardHeader } from '@/components/ui/Card'
 import { Alert, Badge } from '@/components/ui/Feedback'
+import { LESOTHO_STATUS } from '@/lib/labels'
 import { PageHeader } from '@/components/ui/Page'
 import { LoadingBlock } from '@/components/ui/Spinner'
 import { ApiError } from '@/lib/api'
@@ -67,12 +68,23 @@ export default function CropDetailPage() {
         <Badge>
           <CalendarClock className="size-3" aria-hidden /> {durationLabel(c)}
         </Badge>
+        <Badge tone={LESOTHO_STATUS[c.lesotho].tone}>{LESOTHO_STATUS[c.lesotho].label}</Badge>
       </div>
+      {!c.model_ranked && (
+        <Alert tone="info" title="Advisor only" className="mb-6">
+          The recommendation model has no training data for {c.name.toLowerCase()}, so it never ranks it. The ranges
+          below come from published agronomic guides and drive the crop advisor and planting tracker.
+        </Alert>
+      )}
 
       <Card>
         <CardHeader
           title="Growing conditions"
-          description="The shaded band is the optimal range (the middle 80% of observations); the line marks the typical value."
+          description={
+            c.model_ranked
+              ? 'The shaded band is the optimal range (the middle 80% of observations); the line marks the typical value.'
+              : 'The shaded band is the optimal range from published guides; the line marks its midpoint.'
+          }
         />
         <CardBody>
           <ul className="divide-y divide-line">
@@ -98,7 +110,10 @@ export default function CropDetailPage() {
         </CardBody>
       </Card>
       <p className="mt-4 text-xs text-fg-subtle">
-        Ranges are derived from the training dataset. Durations are typical planning values and
+        {c.model_ranked
+          ? 'Ranges are derived from the training dataset.'
+          : 'Ranges are approximate values from published guides, in the same units as the dataset.'}{' '}
+        Durations are typical planning values and
         vary with variety, altitude and season.
       </p>
     </>

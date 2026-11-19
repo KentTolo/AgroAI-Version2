@@ -1,0 +1,293 @@
+{
+  "_note": "Approximate optimal ranges for Lesotho crops that are not in the model's training data, compiled from general agronomic references (FAO Ecocrop optimal ranges and crop production guides), converted to the dataset's units. They drive the crop advisor only; the model cannot rank these crops. p10 and p90 bound the optimal range.",
+  "crops": {
+    "sorghum": {
+      "nitrogen": {
+        "min": 42.0,
+        "max": 98.0,
+        "mean": 70.0,
+        "p10": 50,
+        "p25": 60.0,
+        "median": 70.0,
+        "p75": 80.0,
+        "p90": 90
+      },
+      "phosphorus": {
+        "min": 25.0,
+        "max": 60.0,
+        "mean": 42.5,
+        "p10": 30,
+        "p25": 36.25,
+        "median": 42.5,
+        "p75": 48.75,
+        "p90": 55
+      },
+      "potassium": {
+        "min": 12.0,
+        "max": 33.0,
+        "mean": 22.5,
+        "p10": 15,
+        "p25": 18.75,
+        "median": 22.5,
+        "p75": 26.25,
+        "p90": 30
+      },
+      "temperature": {
+        "min": 20.0,
+        "max": 34.0,
+        "mean": 27.0,
+        "p10": 22,
+        "p25": 24.5,
+        "median": 27.0,
+        "p75": 29.5,
+        "p90": 32
+      },
+      "humidity": {
+        "min": 34.0,
+        "max": 76.0,
+        "mean": 55.0,
+        "p10": 40,
+        "p25": 47.5,
+        "median": 55.0,
+        "p75": 62.5,
+        "p90": 70
+      },
+      "ph": {
+        "min": 5.1,
+        "max": 7.9,
+        "mean": 6.5,
+        "p10": 5.5,
+        "p25": 6.0,
+        "median": 6.5,
+        "p75": 7.0,
+        "p90": 7.5
+      },
+      "rainfall": {
+        "min": 35.0,
+        "max": 105.0,
+        "mean": 70.0,
+        "p10": 45,
+        "p25": 57.5,
+        "median": 70.0,
+        "p75": 82.5,
+        "p90": 95
+      }
+    },
+    "wheat": {
+      "nitrogen": {
+        "min": 52.0,
+        "max": 108.0,
+        "mean": 80.0,
+        "p10": 60,
+        "p25": 70.0,
+        "median": 80.0,
+        "p75": 90.0,
+        "p90": 100
+      },
+      "phosphorus": {
+        "min": 30.0,
+        "max": 65.0,
+        "mean": 47.5,
+        "p10": 35,
+        "p25": 41.25,
+        "median": 47.5,
+        "p75": 53.75,
+        "p90": 60
+      },
+      "potassium": {
+        "min": 17.0,
+        "max": 38.0,
+        "mean": 27.5,
+        "p10": 20,
+        "p25": 23.75,
+        "median": 27.5,
+        "p75": 31.25,
+        "p90": 35
+      },
+      "temperature": {
+        "min": 9.6,
+        "max": 26.4,
+        "mean": 18.0,
+        "p10": 12,
+        "p25": 15.0,
+        "median": 18.0,
+        "p75": 21.0,
+        "p90": 24
+      },
+      "humidity": {
+        "min": 40.0,
+        "max": 75.0,
+        "mean": 57.5,
+        "p10": 45,
+        "p25": 51.25,
+        "median": 57.5,
+        "p75": 63.75,
+        "p90": 70
+      },
+      "ph": {
+        "min": 5.7,
+        "max": 7.8,
+        "mean": 6.75,
+        "p10": 6.0,
+        "p25": 6.38,
+        "median": 6.75,
+        "p75": 7.12,
+        "p90": 7.5
+      },
+      "rainfall": {
+        "min": 26.0,
+        "max": 89.0,
+        "mean": 57.5,
+        "p10": 35,
+        "p25": 46.25,
+        "median": 57.5,
+        "p75": 68.75,
+        "p90": 80
+      }
+    },
+    "peas": {
+      "nitrogen": {
+        "min": 4.0,
+        "max": 46.0,
+        "mean": 25.0,
+        "p10": 10,
+        "p25": 17.5,
+        "median": 25.0,
+        "p75": 32.5,
+        "p90": 40
+      },
+      "phosphorus": {
+        "min": 34.0,
+        "max": 76.0,
+        "mean": 55.0,
+        "p10": 40,
+        "p25": 47.5,
+        "median": 55.0,
+        "p75": 62.5,
+        "p90": 70
+      },
+      "potassium": {
+        "min": 16.0,
+        "max": 44.0,
+        "mean": 30.0,
+        "p10": 20,
+        "p25": 25.0,
+        "median": 30.0,
+        "p75": 35.0,
+        "p90": 40
+      },
+      "temperature": {
+        "min": 10.0,
+        "max": 24.0,
+        "mean": 17.0,
+        "p10": 12,
+        "p25": 14.5,
+        "median": 17.0,
+        "p75": 19.5,
+        "p90": 22
+      },
+      "humidity": {
+        "min": 45.0,
+        "max": 80.0,
+        "mean": 62.5,
+        "p10": 50,
+        "p25": 56.25,
+        "median": 62.5,
+        "p75": 68.75,
+        "p90": 75
+      },
+      "ph": {
+        "min": 5.7,
+        "max": 7.8,
+        "mean": 6.75,
+        "p10": 6.0,
+        "p25": 6.38,
+        "median": 6.75,
+        "p75": 7.12,
+        "p90": 7.5
+      },
+      "rainfall": {
+        "min": 30.0,
+        "max": 100.0,
+        "mean": 65.0,
+        "p10": 40,
+        "p25": 52.5,
+        "median": 65.0,
+        "p75": 77.5,
+        "p90": 90
+      }
+    },
+    "potato": {
+      "nitrogen": {
+        "min": 50.0,
+        "max": 120.0,
+        "mean": 85.0,
+        "p10": 60,
+        "p25": 72.5,
+        "median": 85.0,
+        "p75": 97.5,
+        "p90": 110
+      },
+      "phosphorus": {
+        "min": 39.0,
+        "max": 81.0,
+        "mean": 60.0,
+        "p10": 45,
+        "p25": 52.5,
+        "median": 60.0,
+        "p75": 67.5,
+        "p90": 75
+      },
+      "potassium": {
+        "min": 32.0,
+        "max": 88.0,
+        "mean": 60.0,
+        "p10": 40,
+        "p25": 50.0,
+        "median": 60.0,
+        "p75": 70.0,
+        "p90": 80
+      },
+      "temperature": {
+        "min": 13.6,
+        "max": 23.4,
+        "mean": 18.5,
+        "p10": 15,
+        "p25": 16.75,
+        "median": 18.5,
+        "p75": 20.25,
+        "p90": 22
+      },
+      "humidity": {
+        "min": 55.0,
+        "max": 90.0,
+        "mean": 72.5,
+        "p10": 60,
+        "p25": 66.25,
+        "median": 72.5,
+        "p75": 78.75,
+        "p90": 85
+      },
+      "ph": {
+        "min": 4.7,
+        "max": 6.8,
+        "mean": 5.75,
+        "p10": 5.0,
+        "p25": 5.38,
+        "median": 5.75,
+        "p75": 6.12,
+        "p90": 6.5
+      },
+      "rainfall": {
+        "min": 48.0,
+        "max": 132.0,
+        "mean": 90.0,
+        "p10": 60,
+        "p25": 75.0,
+        "median": 90.0,
+        "p75": 105.0,
+        "p90": 120
+      }
+    }
+  }
+}

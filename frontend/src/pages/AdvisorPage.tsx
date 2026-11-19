@@ -1,3 +1,4 @@
+import { CropOptions } from '@/components/CropOptions'
 import { useQuery } from '@tanstack/react-query'
 import { ClipboardCheck } from 'lucide-react'
 import { useEffect, useState } from 'react'
@@ -75,11 +76,7 @@ export default function AdvisorPage() {
                 {({ id, invalid }) => (
                   <Select id={id} invalid={invalid} value={crop} onChange={(e) => setCrop(e.target.value)}>
                     <option value="">Choose a crop…</option>
-                    {crops.data?.map((c) => (
-                      <option key={c.slug} value={c.slug}>
-                        {c.name}
-                      </option>
-                    ))}
+                    <CropOptions crops={crops.data} />
                   </Select>
                 )}
               </FormField>

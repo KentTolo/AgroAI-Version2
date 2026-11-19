@@ -14,6 +14,7 @@ import type {
   ParameterKey,
   Reading,
   Recommendation,
+  RecommendationScope,
   User,
 } from '@/lib/types'
 import {
@@ -29,7 +30,9 @@ import {
   generateSeries,
   isoDate,
   outOfRangeWarnings,
+  alsoConsider,
   rankCrops,
+  rankForScope,
   type CropDef,
   type ForestModel,
   type Knowledge,
@@ -44,7 +47,12 @@ interface StoredUser extends Omit<User, 'is_admin'> {
 }
 type StoredField = Omit<Field, 'latest_reading' | 'active_cycle_count'> & { owner_id: string }
 type StoredCycle = Omit<CropCycle, 'field_name' | 'crop_name' | 'progress'>
-type StoredRecommendation = Omit<Recommendation, 'warnings'> & { user_id: string }
+type StoredRecommendation = Omit<Recommendation, 'warnings' | 'predictions' | 'scope' | 'also_consider'> & {
+  user_id: string
+  predictions: { crop: string; name: string; probability: number }[]
+  scope?: RecommendationScope // absent on recommendations saved before scopes existed
+  overall_best?: string
+}
 
 interface Db {
   users: StoredUser[]
@@ -214,8 +222,10 @@ async function seedDemoAccount(db: Db) {
     }
     const latest = series[series.length - 1]
     if (latest) {
-      const ranked = rankCrops(model, latest.values).slice(0, 5)
+      const { ranked, overallBest } = rankForScope(knowledge, model, latest.values, 'lesotho', 5)
       db.recommendations.push({
+        scope: 'lesotho',
+        overall_best: overallBest,
         id: uuid(),
         user_id: user.id,
         field_id: id,
@@ -299,8 +309,22 @@ export async function handleDemoRequest({ method, path, token, body, form, query
     }
   }
   const presentRec = (r: StoredRecommendation): Recommendation => {
-    const { user_id: _user, ...rest } = r
-    return { ...rest, warnings: outOfRangeWarnings(knowledge, r.inputs) }
+    const { user_id: _user, overall_best: overallBest, ...rest } = r
+    const scope = r.scope ?? 'all'
+    const grown = (slug: string) => findCrop(slug)?.lesotho !== 'unsuitable' && findCrop(slug) !== undefined
+    const warnings = outOfRangeWarnings(knowledge, r.inputs)
+    if (scope === 'lesotho' && overallBest && overallBest !== r.recommended_crop) {
+      warnings.push(
+        `The closest match among all crops was ${cropName(knowledge, overallBest)}, which is not commonly grown in Lesotho, so it is left out.`,
+      )
+    }
+    return {
+      ...rest,
+      predictions: r.predictions.map((p) => ({ ...p, grown_in_lesotho: grown(p.crop) })),
+      scope,
+      also_consider: scope === 'lesotho' ? alsoConsider(knowledge, r.inputs) : [],
+      warnings,
+    }
   }
 
   /* --- public routes --- */
@@ -547,8 +571,12 @@ export async function handleDemoRequest({ method, path, token, body, form, query
         }
       }
       if (!conditions) return fail(422, 'Provide conditions, a field_id, or both')
-      const ranked = rankCrops(model, conditions).slice(0, Math.min(Math.max(Number(input.top_k ?? 3), 1), 10))
+      const scope: RecommendationScope = input.scope === 'all' ? 'all' : 'lesotho'
+      const topK = Math.min(Math.max(Number(input.top_k ?? 3), 1), 10)
+      const { ranked, overallBest } = rankForScope(knowledge, model, conditions, scope, topK)
       const rec: StoredRecommendation = {
+        scope,
+        overall_best: overallBest,
         id: uuid(),
         user_id: user.id,
         field_id: fieldId,
@@ -662,6 +690,8 @@ function cropRead(c: CropDef) {
     lifecycle: c.lifecycle,
     days_to_harvest: c.days_to_harvest,
     description: c.description,
+    lesotho: c.lesotho,
+    model_ranked: c.model_ranked,
     requirements: Object.fromEntries(
       Object.entries(c.profile).map(([key, s]) => [
         key,

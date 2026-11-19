@@ -4,7 +4,7 @@ import { Link, useSearchParams } from 'react-router'
 import { useQuery } from '@tanstack/react-query'
 import { ClimateSource, type ClimateChoice } from '@/components/ClimateSource'
 import { ConditionsForm } from '@/components/ConditionsForm'
-import { ConditionTiles, PredictionList } from '@/components/Results'
+import { ConditionTiles, PredictionList, SuitabilityList } from '@/components/Results'
 import { confidenceLabel } from '@/lib/labels'
 import { Button, ButtonLink } from '@/components/ui/Button'
 import { Card, CardBody, CardHeader } from '@/components/ui/Card'
@@ -16,7 +16,7 @@ import { api } from '@/lib/api'
 import { formatDateTime, formatPercent } from '@/lib/format'
 import { EXAMPLE_CONDITIONS, pickConditions } from '@/lib/parameters'
 import { useCrops, useFields, useRecommend } from '@/lib/queries'
-import type { GrowingConditions, Recommendation } from '@/lib/types'
+import type { GrowingConditions, Recommendation, RecommendationScope } from '@/lib/types'
 
 function RecommendationResult({ rec }: { rec: Recommendation }) {
   const crops = useCrops()
@@ -49,7 +49,13 @@ function RecommendationResult({ rec }: { rec: Recommendation }) {
           </ul>
         </Alert>
       )}
-      {top.probability < 0.4 && rec.warnings.length === 0 && (
+      {rec.scope === 'lesotho' && top.probability < 0.05 && (
+        <Alert tone="info" title="No Lesotho crop is a close match">
+          These conditions are unlike anywhere the Lesotho crops below were observed growing, so the ranking means
+          little. Check the advisor scores for the Lesotho staples, or see which conditions to change.
+        </Alert>
+      )}
+      {top.probability >= 0.05 && top.probability < 0.4 && rec.warnings.length === 0 && (
         <Alert tone="info" title="No clear winner">
           Several crops fit these conditions similarly well. Compare the options below with the crop
           advisor before deciding.
@@ -57,9 +63,22 @@ function RecommendationResult({ rec }: { rec: Recommendation }) {
       )}
 
       <div>
-        <h3 className="mb-3 text-sm font-semibold">Ranked crops</h3>
+        <h3 className="mb-3 text-sm font-semibold">
+          {rec.scope === 'lesotho' ? 'Ranked crops grown in Lesotho' : 'Ranked crops'}
+        </h3>
         <PredictionList predictions={rec.predictions} />
       </div>
+
+      {rec.also_consider.length > 0 && (
+        <div>
+          <h3 className="text-sm font-semibold">Other Lesotho staples</h3>
+          <p className="mt-0.5 mb-3 text-xs text-fg-muted">
+            The model has no training data for these, so the crop advisor scores them against published growing
+            ranges instead.
+          </p>
+          <SuitabilityList items={rec.also_consider} from={rec.id} />
+        </div>
+      )}
 
       <div className="flex flex-wrap gap-2">
         <ButtonLink
@@ -104,6 +123,7 @@ export default function RecommendPage() {
   const [manualFieldId, setFieldId] = useState<string | null>(null)
   const [manualValues, setValues] = useState<GrowingConditions | null>(null)
   const [climate, setClimate] = useState<ClimateChoice | null>(null)
+  const [scope, setScope] = useState<RecommendationScope>('lesotho')
 
   const saved = useQuery({
     queryKey: ['recommendations', 'one', resultId],
@@ -124,7 +144,7 @@ export default function RecommendPage() {
 
   const submit = (conditions: GrowingConditions) =>
     recommend.mutate(
-      { conditions, field_id: fieldId || null, top_k: 5, climate_basis: climate?.basis ?? null },
+      { conditions, field_id: fieldId || null, top_k: 5, climate_basis: climate?.basis ?? null, scope },
       { onSuccess: (rec) => setParams({ id: rec.id }) },
     )
 
@@ -181,6 +201,20 @@ export default function RecommendPage() {
               onSubmit={submit}
               footer={
                 <>
+                  <label className="flex items-start gap-2.5 text-sm">
+                    <input
+                      type="checkbox"
+                      className="mt-0.5 size-4 accent-[var(--brand)]"
+                      checked={scope === 'lesotho'}
+                      onChange={(e) => setScope(e.target.checked ? 'lesotho' : 'all')}
+                    />
+                    <span>
+                      Only crops grown in Lesotho
+                      <span className="block text-xs text-fg-subtle">
+                        Leaves out tropical crops such as rice, coffee and coconut.
+                      </span>
+                    </span>
+                  </label>
                   {recommend.error && <Alert tone="danger">{recommend.error.message}</Alert>}
                   <Button type="submit" size="lg" className="w-full" icon={<Sparkles />} loading={recommend.isPending}>
                     Recommend crops

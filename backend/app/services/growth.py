@@ -42,7 +42,7 @@ STAGE_TEMPLATES: dict[Lifecycle, tuple[StageTemplate, ...]] = {
             "The most water-sensitive stage: avoid moisture stress and protect pollinators.",
         ),
         StageTemplate(
-            "Grain and fruit development",
+            "Grain, pod, fruit or tuber filling",
             0.65,
             0.9,
             "Maintain moisture, watch for disease and avoid late nitrogen.",

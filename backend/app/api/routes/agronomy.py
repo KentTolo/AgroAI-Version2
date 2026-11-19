@@ -81,7 +81,17 @@ def create_recommendation(
     if conditions is None:  # pragma: no cover - RecommendationRequest guarantees an input
         raise HTTPException(status_code=422, detail="Provide conditions or a field_id")
     inputs = conditions.model_dump()
-    ranked = recommender.rank(inputs, top_k=payload.top_k)
+    catalog = get_catalog()
+    ranked = recommender.rank(inputs)
+    overall_best = ranked[0].crop
+    if payload.scope == "lesotho":
+        ranked = [
+            s for s in ranked if (c := catalog.get(s.crop)) is not None and c.grown_in_lesotho
+        ]
+    ranked = ranked[: payload.top_k]
+    context: dict[str, str] = {"scope": payload.scope, "overall_best": overall_best}
+    if payload.climate_basis:
+        context["climate_basis"] = payload.climate_basis
     rec = Recommendation(
         user_id=user.id,
         field_id=payload.field_id,
@@ -89,11 +99,11 @@ def create_recommendation(
         predictions=[{"crop": s.crop, "probability": round(s.probability, 4)} for s in ranked],
         recommended_crop=ranked[0].crop,
         model_version=recommender.version,
-        context={"climate_basis": payload.climate_basis} if payload.climate_basis else None,
+        context=context,
     )
     db.add(rec)
     db.commit()
-    return recommendation_read(rec, get_catalog())
+    return recommendation_read(rec, catalog)
 
 
 @router.get("/recommendations", response_model=Page[RecommendationRead], tags=["recommendations"])

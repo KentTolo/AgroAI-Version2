@@ -108,7 +108,9 @@ def test_dashboard_lists_recent_activity(
     client: TestClient, auth: dict[str, str], field_id: str
 ) -> None:
     client.post(f"/api/v1/fields/{field_id}/readings", json=RICE_CONDITIONS, headers=auth)
-    client.post("/api/v1/recommendations", json={"field_id": field_id}, headers=auth)
+    client.post(
+        "/api/v1/recommendations", json={"field_id": field_id, "scope": "all"}, headers=auth
+    )
     body = client.get("/api/v1/dashboard", headers=auth).json()
     assert body["reading_count"] == 1
     assert body["recommendation_count"] == 1

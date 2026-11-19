@@ -22,6 +22,7 @@ import type {
   Page,
   Reading,
   Recommendation,
+  RecommendationScope,
   Token,
   User,
 } from './types'
@@ -225,6 +226,7 @@ export const api = {
     field_id?: string | null
     top_k?: number
     climate_basis?: string | null
+    scope?: RecommendationScope
   }) => request<Recommendation>('/recommendations', { method: 'POST', body: input }),
   recommendations: (query: { field_id?: string; limit?: number; offset?: number } = {}) =>
     request<Page<Recommendation>>('/recommendations', { query: { ...query } }),

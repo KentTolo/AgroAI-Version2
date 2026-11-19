@@ -12,6 +12,7 @@ from app.schemas.agronomy import (
     AdvisoryRead,
     CropPrediction,
     CropRead,
+    CropSuitability,
     CycleRead,
     ParameterAssessmentRead,
     ParameterRange,
@@ -20,7 +21,7 @@ from app.schemas.agronomy import (
 )
 from app.schemas.common import GrowingConditions
 from app.schemas.user import UserRead
-from app.services.advisory import SEVERITY_SCORES, Assessment
+from app.services.advisory import SEVERITY_SCORES, Assessment, assess
 from app.services.crops import CropCatalog, CropInfo
 from app.services.growth import compute_progress
 
@@ -50,6 +51,8 @@ def crop_read(crop: CropInfo) -> CropRead:
         lifecycle=crop.lifecycle,
         days_to_harvest=crop.days_to_harvest,
         description=crop.description,
+        lesotho=crop.lesotho,
+        model_ranked=crop.model_ranked,
         requirements=requirements,
     )
 
@@ -69,10 +72,38 @@ def out_of_range_warnings(conditions: dict[str, float], catalog: CropCatalog) ->
     return warnings
 
 
+def also_consider(conditions: dict[str, float], catalog: CropCatalog) -> list[CropSuitability]:
+    """Lesotho crops the model cannot rank, scored by the advisor, best first."""
+    scored = [
+        assess(crop, conditions)
+        for crop in catalog.crops.values()
+        if crop.grown_in_lesotho and not crop.model_ranked
+    ]
+    scored.sort(key=lambda a: -a.score)
+    return [
+        CropSuitability(crop=a.crop.slug, name=a.crop.name, score=a.score, verdict=a.verdict)
+        for a in scored
+    ]
+
+
 def recommendation_read(rec: Recommendation, catalog: CropCatalog) -> RecommendationRead:
     def name_of(slug: str) -> str:
         crop = catalog.get(slug)
         return crop.name if crop else slug.title()
+
+    def in_lesotho(slug: str) -> bool:
+        crop = catalog.get(slug)
+        return crop.grown_in_lesotho if crop else False
+
+    context = rec.context or {}
+    scope = context.get("scope", "all")
+    warnings = out_of_range_warnings(rec.inputs, catalog)
+    overall_best = context.get("overall_best")
+    if scope == "lesotho" and overall_best and overall_best != rec.recommended_crop:
+        warnings.append(
+            f"The closest match among all crops was {name_of(overall_best)}, which is not "
+            "commonly grown in Lesotho, so it is left out."
+        )
 
     return RecommendationRead(
         id=rec.id,
@@ -81,12 +112,19 @@ def recommendation_read(rec: Recommendation, catalog: CropCatalog) -> Recommenda
         inputs=GrowingConditions.model_validate(rec.inputs),
         recommended_crop=rec.recommended_crop,
         predictions=[
-            CropPrediction(crop=p["crop"], name=name_of(p["crop"]), probability=p["probability"])
+            CropPrediction(
+                crop=p["crop"],
+                name=name_of(p["crop"]),
+                probability=p["probability"],
+                grown_in_lesotho=in_lesotho(p["crop"]),
+            )
             for p in rec.predictions
         ],
         model_version=rec.model_version,
-        climate_basis=(rec.context or {}).get("climate_basis"),
-        warnings=out_of_range_warnings(rec.inputs, catalog),
+        climate_basis=context.get("climate_basis"),
+        scope=scope,
+        also_consider=also_consider(rec.inputs, catalog) if scope == "lesotho" else [],
+        warnings=warnings,
     )
 
 

@@ -8,7 +8,9 @@ RECS = "/api/v1/recommendations"
 
 
 def test_recommend_from_conditions(client: TestClient, auth: dict[str, str]) -> None:
-    response = client.post(RECS, json={"conditions": RICE_CONDITIONS, "top_k": 5}, headers=auth)
+    response = client.post(
+        RECS, json={"conditions": RICE_CONDITIONS, "top_k": 5, "scope": "all"}, headers=auth
+    )
     assert response.status_code == 201
     body = response.json()
     assert body["recommended_crop"] == "rice"
@@ -17,11 +19,32 @@ def test_recommend_from_conditions(client: TestClient, auth: dict[str, str]) -> 
         "crop": "rice",
         "name": "Rice",
         "probability": body["predictions"][0]["probability"],
+        "grown_in_lesotho": False,
     }
     probabilities = [p["probability"] for p in body["predictions"]]
     assert probabilities == sorted(probabilities, reverse=True)
     assert body["model_version"] == "test-model"
     assert body["warnings"] == []
+    assert body["scope"] == "all"
+    assert body["also_consider"] == []
+
+
+def test_lesotho_scope_is_the_default(client: TestClient, auth: dict[str, str]) -> None:
+    response = client.post(RECS, json={"conditions": RICE_CONDITIONS, "top_k": 5}, headers=auth)
+    assert response.status_code == 201
+    body = response.json()
+    assert body["scope"] == "lesotho"
+    assert body["recommended_crop"] != "rice"
+    assert all(p["grown_in_lesotho"] for p in body["predictions"])
+    probabilities = [p["probability"] for p in body["predictions"]]
+    assert probabilities == sorted(probabilities, reverse=True)
+    # The excluded best overall match is explained.
+    assert any("Rice" in w and "Lesotho" in w for w in body["warnings"])
+    # Lesotho staples the model cannot rank are scored by the advisor instead.
+    extra = body["also_consider"]
+    assert {c["crop"] for c in extra} == {"sorghum", "wheat", "peas", "potato"}
+    scores = [c["score"] for c in extra]
+    assert scores == sorted(scores, reverse=True)
 
 
 def test_recommend_from_field_latest_reading(
@@ -47,7 +70,7 @@ def test_request_needs_conditions_or_field(client: TestClient, auth: dict[str, s
 
 def test_out_of_distribution_inputs_are_flagged(client: TestClient, auth: dict[str, str]) -> None:
     conditions = RICE_CONDITIONS | {"rainfall": 600, "temperature": 2}
-    body = client.post(RECS, json={"conditions": conditions}, headers=auth).json()
+    body = client.post(RECS, json={"conditions": conditions, "scope": "all"}, headers=auth).json()
     assert len(body["warnings"]) == 2
     assert any("Rainfall" in w for w in body["warnings"])
 

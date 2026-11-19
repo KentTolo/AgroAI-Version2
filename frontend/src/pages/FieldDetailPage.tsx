@@ -9,6 +9,7 @@ import {
   Trash2,
   Wand2,
 } from 'lucide-react'
+import { CropOptions } from '@/components/CropOptions'
 import { useMemo, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router'
 import { ConditionsForm } from '@/components/ConditionsForm'
@@ -254,11 +255,7 @@ function StartCycleDialog({ field, open, onClose }: { field: Field; open: boolea
           {({ id, describedBy }) => (
             <Select id={id} value={crop} aria-describedby={describedBy} onChange={(e) => setCrop(e.target.value)}>
               <option value="">Choose a crop…</option>
-              {crops.data?.map((c) => (
-                <option key={c.slug} value={c.slug}>
-                  {c.name}
-                </option>
-              ))}
+              <CropOptions crops={crops.data} />
             </Select>
           )}
         </FormField>

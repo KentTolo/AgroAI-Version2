@@ -1,27 +1,240 @@
 {
   "_note": "Durations are typical values for planning only; they vary with variety, altitude and season. Confirm with a local extension officer.",
   "crops": [
-    {"slug": "apple", "name": "Apple", "category": "fruit", "lifecycle": "perennial", "days_to_harvest": 1095, "description": "Temperate tree fruit that needs winter chilling. First crop typically 3 years after planting grafted trees."},
-    {"slug": "banana", "name": "Banana", "category": "fruit", "lifecycle": "perennial", "days_to_harvest": 300, "description": "Frost-sensitive herbaceous perennial that needs warmth and steady moisture. First bunch about 9 to 12 months after planting."},
-    {"slug": "blackgram", "name": "Black gram", "category": "legume", "lifecycle": "annual", "days_to_harvest": 90, "description": "Short-season pulse that fixes nitrogen and tolerates moderate drought."},
-    {"slug": "chickpea", "name": "Chickpea", "category": "legume", "lifecycle": "annual", "days_to_harvest": 100, "description": "Cool-season pulse suited to drier conditions and residual soil moisture."},
-    {"slug": "coconut", "name": "Coconut", "category": "plantation", "lifecycle": "perennial", "days_to_harvest": 2190, "description": "Tropical palm needing high humidity and warmth. Starts bearing after about 6 years."},
-    {"slug": "coffee", "name": "Coffee", "category": "plantation", "lifecycle": "perennial", "days_to_harvest": 1095, "description": "Shade-tolerant tropical shrub. First harvest roughly 3 years after planting."},
-    {"slug": "cotton", "name": "Cotton", "category": "fibre", "lifecycle": "annual", "days_to_harvest": 160, "description": "Warm-season fibre crop with a long growing period and high potassium demand."},
-    {"slug": "grapes", "name": "Grapes", "category": "fruit", "lifecycle": "perennial", "days_to_harvest": 1095, "description": "Vine fruit that prefers warm, dry summers. Meaningful yields from about the third year."},
-    {"slug": "jute", "name": "Jute", "category": "fibre", "lifecycle": "annual", "days_to_harvest": 120, "description": "Fibre crop of warm, humid, high-rainfall areas."},
-    {"slug": "kidneybeans", "name": "Kidney beans", "category": "legume", "lifecycle": "annual", "days_to_harvest": 90, "description": "Common bean grown for dry grain. Sensitive to frost and waterlogging."},
-    {"slug": "lentil", "name": "Lentil", "category": "legume", "lifecycle": "annual", "days_to_harvest": 110, "description": "Cool-season pulse that tolerates drought and poorer soils."},
-    {"slug": "maize", "name": "Maize", "category": "cereal", "lifecycle": "annual", "days_to_harvest": 120, "description": "Staple cereal. Needs good nitrogen supply and moisture around flowering."},
-    {"slug": "mango", "name": "Mango", "category": "fruit", "lifecycle": "perennial", "days_to_harvest": 1460, "description": "Tropical tree fruit needing a warm, frost-free climate. Grafted trees bear after 3 to 5 years."},
-    {"slug": "mothbeans", "name": "Moth beans", "category": "legume", "lifecycle": "annual", "days_to_harvest": 75, "description": "Very drought-hardy pulse for hot, dry conditions."},
-    {"slug": "mungbean", "name": "Mung bean", "category": "legume", "lifecycle": "annual", "days_to_harvest": 65, "description": "Fast-maturing warm-season pulse, useful as a catch crop."},
-    {"slug": "muskmelon", "name": "Muskmelon", "category": "fruit", "lifecycle": "annual", "days_to_harvest": 85, "description": "Warm-season vine fruit that prefers dry weather during ripening."},
-    {"slug": "orange", "name": "Orange", "category": "fruit", "lifecycle": "perennial", "days_to_harvest": 1095, "description": "Citrus tree for frost-free, warm sites. Grafted trees bear after about 3 years."},
-    {"slug": "papaya", "name": "Papaya", "category": "fruit", "lifecycle": "perennial", "days_to_harvest": 300, "description": "Fast-growing tropical fruit. First fruit about 9 to 11 months after transplanting."},
-    {"slug": "pigeonpeas", "name": "Pigeon peas", "category": "legume", "lifecycle": "annual", "days_to_harvest": 150, "description": "Deep-rooted, drought-tolerant pulse that improves soil fertility."},
-    {"slug": "pomegranate", "name": "Pomegranate", "category": "fruit", "lifecycle": "perennial", "days_to_harvest": 730, "description": "Drought-tolerant shrub fruit for hot, dry summers. Starts bearing in about 2 years."},
-    {"slug": "rice", "name": "Rice", "category": "cereal", "lifecycle": "annual", "days_to_harvest": 120, "description": "Cereal that needs abundant water, warmth and high humidity."},
-    {"slug": "watermelon", "name": "Watermelon", "category": "fruit", "lifecycle": "annual", "days_to_harvest": 85, "description": "Warm-season vine fruit that needs sun, warmth and well-drained soil."}
-  ]
+    {
+      "slug": "apple",
+      "name": "Apple",
+      "category": "fruit",
+      "lifecycle": "perennial",
+      "days_to_harvest": 1095,
+      "description": "Temperate tree fruit that needs winter chilling. First crop typically 3 years after planting grafted trees.",
+      "lesotho": "common"
+    },
+    {
+      "slug": "banana",
+      "name": "Banana",
+      "category": "fruit",
+      "lifecycle": "perennial",
+      "days_to_harvest": 300,
+      "description": "Frost-sensitive herbaceous perennial that needs warmth and steady moisture. First bunch about 9 to 12 months after planting.",
+      "lesotho": "unsuitable"
+    },
+    {
+      "slug": "blackgram",
+      "name": "Black gram",
+      "category": "legume",
+      "lifecycle": "annual",
+      "days_to_harvest": 90,
+      "description": "Short-season pulse that fixes nitrogen and tolerates moderate drought.",
+      "lesotho": "unsuitable"
+    },
+    {
+      "slug": "chickpea",
+      "name": "Chickpea",
+      "category": "legume",
+      "lifecycle": "annual",
+      "days_to_harvest": 100,
+      "description": "Cool-season pulse suited to drier conditions and residual soil moisture.",
+      "lesotho": "possible"
+    },
+    {
+      "slug": "coconut",
+      "name": "Coconut",
+      "category": "plantation",
+      "lifecycle": "perennial",
+      "days_to_harvest": 2190,
+      "description": "Tropical palm needing high humidity and warmth. Starts bearing after about 6 years.",
+      "lesotho": "unsuitable"
+    },
+    {
+      "slug": "coffee",
+      "name": "Coffee",
+      "category": "plantation",
+      "lifecycle": "perennial",
+      "days_to_harvest": 1095,
+      "description": "Shade-tolerant tropical shrub. First harvest roughly 3 years after planting.",
+      "lesotho": "unsuitable"
+    },
+    {
+      "slug": "cotton",
+      "name": "Cotton",
+      "category": "fibre",
+      "lifecycle": "annual",
+      "days_to_harvest": 160,
+      "description": "Warm-season fibre crop with a long growing period and high potassium demand.",
+      "lesotho": "unsuitable"
+    },
+    {
+      "slug": "grapes",
+      "name": "Grapes",
+      "category": "fruit",
+      "lifecycle": "perennial",
+      "days_to_harvest": 1095,
+      "description": "Vine fruit that prefers warm, dry summers. Meaningful yields from about the third year.",
+      "lesotho": "possible"
+    },
+    {
+      "slug": "jute",
+      "name": "Jute",
+      "category": "fibre",
+      "lifecycle": "annual",
+      "days_to_harvest": 120,
+      "description": "Fibre crop of warm, humid, high-rainfall areas.",
+      "lesotho": "unsuitable"
+    },
+    {
+      "slug": "kidneybeans",
+      "name": "Dry beans (kidney)",
+      "category": "legume",
+      "lifecycle": "annual",
+      "days_to_harvest": 90,
+      "description": "Common bean grown for dry grain. Sensitive to frost and waterlogging.",
+      "lesotho": "staple"
+    },
+    {
+      "slug": "lentil",
+      "name": "Lentil",
+      "category": "legume",
+      "lifecycle": "annual",
+      "days_to_harvest": 110,
+      "description": "Cool-season pulse that tolerates drought and poorer soils.",
+      "lesotho": "possible"
+    },
+    {
+      "slug": "maize",
+      "name": "Maize",
+      "category": "cereal",
+      "lifecycle": "annual",
+      "days_to_harvest": 120,
+      "description": "Staple cereal. Needs good nitrogen supply and moisture around flowering.",
+      "lesotho": "staple"
+    },
+    {
+      "slug": "mango",
+      "name": "Mango",
+      "category": "fruit",
+      "lifecycle": "perennial",
+      "days_to_harvest": 1460,
+      "description": "Tropical tree fruit needing a warm, frost-free climate. Grafted trees bear after 3 to 5 years.",
+      "lesotho": "unsuitable"
+    },
+    {
+      "slug": "mothbeans",
+      "name": "Moth beans",
+      "category": "legume",
+      "lifecycle": "annual",
+      "days_to_harvest": 75,
+      "description": "Very drought-hardy pulse for hot, dry conditions.",
+      "lesotho": "unsuitable"
+    },
+    {
+      "slug": "mungbean",
+      "name": "Mung bean",
+      "category": "legume",
+      "lifecycle": "annual",
+      "days_to_harvest": 65,
+      "description": "Fast-maturing warm-season pulse, useful as a catch crop.",
+      "lesotho": "unsuitable"
+    },
+    {
+      "slug": "muskmelon",
+      "name": "Muskmelon",
+      "category": "fruit",
+      "lifecycle": "annual",
+      "days_to_harvest": 85,
+      "description": "Warm-season vine fruit that prefers dry weather during ripening.",
+      "lesotho": "possible"
+    },
+    {
+      "slug": "orange",
+      "name": "Orange",
+      "category": "fruit",
+      "lifecycle": "perennial",
+      "days_to_harvest": 1095,
+      "description": "Citrus tree for frost-free, warm sites. Grafted trees bear after about 3 years.",
+      "lesotho": "unsuitable"
+    },
+    {
+      "slug": "papaya",
+      "name": "Papaya",
+      "category": "fruit",
+      "lifecycle": "perennial",
+      "days_to_harvest": 300,
+      "description": "Fast-growing tropical fruit. First fruit about 9 to 11 months after transplanting.",
+      "lesotho": "unsuitable"
+    },
+    {
+      "slug": "peas",
+      "name": "Dry peas",
+      "category": "legume",
+      "lifecycle": "annual",
+      "days_to_harvest": 100,
+      "lesotho": "staple",
+      "description": "Cool-season pulse grown in the mountains and foothills. Fixes nitrogen, so it suits rotation with maize and wheat."
+    },
+    {
+      "slug": "pigeonpeas",
+      "name": "Pigeon peas",
+      "category": "legume",
+      "lifecycle": "annual",
+      "days_to_harvest": 150,
+      "description": "Deep-rooted, drought-tolerant pulse that improves soil fertility.",
+      "lesotho": "unsuitable"
+    },
+    {
+      "slug": "pomegranate",
+      "name": "Pomegranate",
+      "category": "fruit",
+      "lifecycle": "perennial",
+      "days_to_harvest": 730,
+      "description": "Drought-tolerant shrub fruit for hot, dry summers. Starts bearing in about 2 years.",
+      "lesotho": "possible"
+    },
+    {
+      "slug": "potato",
+      "name": "Potato",
+      "category": "vegetable",
+      "lifecycle": "annual",
+      "days_to_harvest": 110,
+      "lesotho": "common",
+      "description": "Tuber crop for cool highland summers and lowland spring or autumn plantings. Needs loose, well-drained, slightly acidic soil and steady moisture; avoid frost on young shoots."
+    },
+    {
+      "slug": "rice",
+      "name": "Rice",
+      "category": "cereal",
+      "lifecycle": "annual",
+      "days_to_harvest": 120,
+      "description": "Cereal that needs abundant water, warmth and high humidity.",
+      "lesotho": "unsuitable"
+    },
+    {
+      "slug": "sorghum",
+      "name": "Sorghum",
+      "category": "cereal",
+      "lifecycle": "annual",
+      "days_to_harvest": 130,
+      "lesotho": "staple",
+      "description": "Drought-tolerant grain for the lowlands and foothills, planted October to December and used for flour and traditional beer. Tolerates heat and dry spells better than maize."
+    },
+    {
+      "slug": "watermelon",
+      "name": "Watermelon",
+      "category": "fruit",
+      "lifecycle": "annual",
+      "days_to_harvest": 85,
+      "description": "Warm-season vine fruit that needs sun, warmth and well-drained soil.",
+      "lesotho": "common"
+    },
+    {
+      "slug": "wheat",
+      "name": "Wheat",
+      "category": "cereal",
+      "lifecycle": "annual",
+      "days_to_harvest": 180,
+      "lesotho": "staple",
+      "description": "Winter cereal of the mountains and foothills, mostly planted from April to June and harvested in early summer. Spring wheat is sown in August and September."
+    }
+  ],
+  "_lesotho_note": "'lesotho' marks how widely each crop is grown in Lesotho: staple (main field crops per FAO GIEWS and FEWS NET: maize, beans, sorghum, wheat, peas), common, possible (grown on a small scale or suited to some zones) or unsuitable (tropical crops that need frost-free, humid conditions)."
 }

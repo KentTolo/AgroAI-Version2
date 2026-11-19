@@ -34,12 +34,13 @@ export function pickConditions(source: GrowingConditions): GrowingConditions {
 }
 
 /** A worked example (the classic rice-growing sample from the dataset). */
+/** A typical summer maize field in the Lesotho lowlands. */
 export const EXAMPLE_CONDITIONS: GrowingConditions = {
-  nitrogen: 90,
-  phosphorus: 42,
-  potassium: 43,
-  temperature: 20.9,
-  humidity: 82,
-  ph: 6.5,
-  rainfall: 203,
+  nitrogen: 80,
+  phosphorus: 48,
+  potassium: 20,
+  temperature: 22,
+  humidity: 65,
+  ph: 6.2,
+  rainfall: 85,
 }

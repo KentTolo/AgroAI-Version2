@@ -69,6 +69,17 @@ export interface CropPrediction {
   crop: string
   name: string
   probability: number
+  grown_in_lesotho: boolean
+}
+
+export type RecommendationScope = 'lesotho' | 'all'
+
+/** A Lesotho crop the model cannot rank, scored by the crop advisor instead. */
+export interface CropSuitability {
+  crop: string
+  name: string
+  score: number
+  verdict: Verdict
 }
 
 export interface Recommendation {
@@ -80,6 +91,8 @@ export interface Recommendation {
   predictions: CropPrediction[]
   model_version: string
   climate_basis: string | null
+  scope: RecommendationScope
+  also_consider: CropSuitability[]
   warnings: string[]
 }
 
@@ -124,8 +137,13 @@ export interface Crop {
   lifecycle: 'annual' | 'perennial'
   days_to_harvest: number
   description: string
+  lesotho: LesothoStatus
+  /** False when the model has no training data for the crop (advisor only). */
+  model_ranked: boolean
   requirements: Record<ParameterKey, ParameterRange>
 }
+
+export type LesothoStatus = 'staple' | 'common' | 'possible' | 'unsuitable'
 
 export type CycleStatus = 'active' | 'harvested' | 'failed'
 

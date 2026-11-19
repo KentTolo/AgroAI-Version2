@@ -96,9 +96,40 @@ def test_advisory_unknown_crop(client: TestClient, auth: dict[str, str]) -> None
 
 def test_crop_catalog(client: TestClient) -> None:
     crops = client.get("/api/v1/crops").json()
-    assert len(crops) == 22
+    assert len(crops) == 26
+    # Lesotho staples first, tropical crops last.
+    order = {"staple": 0, "common": 1, "possible": 2, "unsuitable": 3}
+    ranks = [order[c["lesotho"]] for c in crops]
+    assert ranks == sorted(ranks)
+    assert {c["slug"] for c in crops if c["lesotho"] == "staple"} == {
+        "maize",
+        "kidneybeans",
+        "sorghum",
+        "wheat",
+        "peas",
+    }
+    sorghum = next(c for c in crops if c["slug"] == "sorghum")
+    assert sorghum["model_ranked"] is False
     maize = client.get("/api/v1/crops/maize").json()
     assert maize["lifecycle"] == "annual"
     ph = maize["requirements"]["ph"]
     assert ph["min"] <= ph["optimal_min"] <= ph["typical"] <= ph["optimal_max"] <= ph["max"]
     assert client.get("/api/v1/crops/unknown").status_code == 404
+
+
+def test_advisor_scores_crops_outside_the_model(client: TestClient, auth: dict[str, str]) -> None:
+    conditions = {
+        "nitrogen": 80,
+        "phosphorus": 48,
+        "potassium": 28,
+        "temperature": 18,
+        "humidity": 58,
+        "ph": 6.6,
+        "rainfall": 55,
+    }
+    body = client.post(
+        "/api/v1/advisory", json={"crop": "wheat", "conditions": conditions}, headers=auth
+    ).json()
+    assert body["crop_name"] == "Wheat"
+    assert body["model_probability"] is None
+    assert body["score"] >= 90

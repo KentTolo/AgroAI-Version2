@@ -1,6 +1,18 @@
 import { describe, expect, it } from 'vitest'
 import type { GrowingConditions } from '@/lib/types'
-import { addDays, assess, computeProgress, generateSeries, predictProba, roundHalfEven, type CropDef, type Knowledge } from './engine'
+import {
+  addDays,
+  alsoConsider,
+  assess,
+  computeProgress,
+  generateSeries,
+  predictProba,
+  rankForScope,
+  roundHalfEven,
+  type CropDef,
+  type ForestModel,
+  type Knowledge,
+} from './engine'
 
 // Two hand-built trees over features [x0, x1] and classes [a, b, c].
 //   tree 1: x0 <= 5 ? (x1 <= 2 ? a : b) : c
@@ -30,7 +42,7 @@ const params = ['nitrogen', 'phosphorus', 'potassium', 'temperature', 'humidity'
 const profile = Object.fromEntries(
   params.map((k) => [k, { min: 0, max: 100, mean: 50, p10: 40, p25: 45, median: 50, p75: 55, p90: 60 }]),
 ) as CropDef['profile']
-const maize: CropDef = { slug: 'maize', name: 'Maize', category: 'cereal', lifecycle: 'annual', days_to_harvest: 100, description: '', profile }
+const maize: CropDef = { slug: 'maize', name: 'Maize', category: 'cereal', lifecycle: 'annual', days_to_harvest: 100, description: '', lesotho: 'staple', model_ranked: true, profile }
 const advice = { increase: { slight: 'up a bit', moderate: 'up more', significant: 'up a lot' }, decrease: { slight: 'down a bit', moderate: 'down more', significant: 'down a lot' } }
 const knowledge = {
   parameters: params.map((key) => ({ key, label: key.toUpperCase(), unit: 'u', min_value: 0, max_value: 1000, tolerance: 1 })),
@@ -95,4 +107,26 @@ it('generates reproducible, in-range sensor series', () => {
   expect(a).toEqual(b)
   expect(a.at(-1)?.recordedAt).toBe(0)
   expect(a.every((p) => Object.values(p.values).every((v) => v >= 0 && v <= 1000))).toBe(true)
+})
+
+describe('Lesotho scope', () => {
+  const rice: CropDef = { ...maize, slug: 'rice', name: 'Rice', lesotho: 'unsuitable' }
+  const sorghum: CropDef = { ...maize, slug: 'sorghum', name: 'Sorghum', model_ranked: false }
+  const lesothoKnowledge = { ...knowledge, crops: [maize, sorghum, rice] } as Knowledge
+  // Three leaf-only trees: two vote rice (class 1), one votes maize (class 0).
+  const model = { features: [...params], classes: ['maize', 'rice'], trees: [[-2], [-2], [-1]] } as unknown as ForestModel
+
+  it('leaves out crops not grown in Lesotho and reports the overall best', () => {
+    const all = rankForScope(lesothoKnowledge, model, typical, 'all', 5)
+    expect(all.ranked.map((s) => s.crop)).toEqual(['rice', 'maize'])
+    const lesotho = rankForScope(lesothoKnowledge, model, typical, 'lesotho', 5)
+    expect(lesotho.ranked.map((s) => s.crop)).toEqual(['maize'])
+    expect(lesotho.overallBest).toBe('rice')
+  })
+
+  it('scores Lesotho staples the model cannot rank with the advisor', () => {
+    expect(alsoConsider(lesothoKnowledge, typical)).toEqual([
+      { crop: 'sorghum', name: 'Sorghum', score: 100, verdict: 'well_suited' },
+    ])
+  })
 })

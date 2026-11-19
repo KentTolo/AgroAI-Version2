@@ -119,6 +119,8 @@ def export_knowledge() -> dict[str, Any]:
                 "lifecycle": c.lifecycle,
                 "days_to_harvest": c.days_to_harvest,
                 "description": c.description,
+                "lesotho": c.lesotho,
+                "model_ranked": c.model_ranked,
                 "profile": c.profile,
             }
             for c in catalog.crops.values()
