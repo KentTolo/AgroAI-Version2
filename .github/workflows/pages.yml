@@ -1,8 +1,13 @@
-name: Deploy demo to GitHub Pages
+name: Deploy web app to GitHub Pages
 
-# Publishes a browser-only build of the web app. GitHub Pages serves static files only, so this
-# build answers API requests in the browser (frontend/src/demo) using the exported model and
-# rules, and stores each visitor's data in their own browser.
+# Publishes the web app to GitHub Pages in one of two modes:
+#
+# * Live (when the repository variable AGROAI_API_URL is set, e.g. https://agroai-api.onrender.com):
+#   the app talks to that API server, with real accounts and a shared database.
+# * Demo (otherwise): a browser-only build that answers API requests in the browser
+#   (frontend/src/demo) and keeps each visitor's data in their own browser.
+#
+# Set the variable under Settings -> Secrets and variables -> Actions -> Variables.
 
 on:
   push:
@@ -25,10 +30,12 @@ jobs:
       - uses: actions/checkout@v4
 
       - uses: astral-sh/setup-uv@v5
+        if: vars.AGROAI_API_URL == ''
         with:
           version: "0.11.32"
           enable-cache: true
       - name: Train the model and export demo assets
+        if: vars.AGROAI_API_URL == ''
         working-directory: backend
         run: |
           uv sync --frozen --no-dev
@@ -40,10 +47,11 @@ jobs:
           node-version: 22
           cache: npm
           cache-dependency-path: frontend/package-lock.json
-      - name: Build the demo
+      - name: Build the web app (${{ vars.AGROAI_API_URL && 'live' || 'demo' }} mode)
         working-directory: frontend
         env:
-          VITE_DEMO_MODE: "true"
+          VITE_DEMO_MODE: ${{ vars.AGROAI_API_URL == '' }}
+          VITE_API_URL: ${{ vars.AGROAI_API_URL && format('{0}/api/v1', vars.AGROAI_API_URL) || '' }}
           VITE_BASE: /${{ github.event.repository.name }}/
         run: |
           npm ci

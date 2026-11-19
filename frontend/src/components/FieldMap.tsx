@@ -20,10 +20,11 @@ function FitBounds({ points }: { points: MapPoint[] }) {
     if (points.length === 0) return
     if (points.length === 1) {
       const [p] = points
-      if (p) map.setView([p.latitude, p.longitude], 13)
+      if (p) map.setView([p.latitude, p.longitude], 13, { animate: false })
       return
     }
-    map.fitBounds(L.latLngBounds(points.map((p) => [p.latitude, p.longitude])), { padding: [32, 32] })
+    // No animation: maps inside dialogs can unmount mid-animation, which makes Leaflet throw.
+    map.fitBounds(L.latLngBounds(points.map((p) => [p.latitude, p.longitude])), { padding: [32, 32], animate: false })
   }, [map, points])
   return null
 }

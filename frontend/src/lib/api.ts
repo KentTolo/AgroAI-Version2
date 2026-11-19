@@ -26,7 +26,7 @@ import type {
   User,
 } from './types'
 
-const BASE_URL = (import.meta.env.VITE_API_URL as string | undefined) ?? '/api/v1'
+const BASE_URL = (import.meta.env.VITE_API_URL as string | undefined) || '/api/v1'
 
 /** The GitHub Pages build has no server: requests are answered in the browser instead. */
 export const DEMO_MODE = import.meta.env.VITE_DEMO_MODE === 'true'

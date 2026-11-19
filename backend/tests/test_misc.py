@@ -41,3 +41,19 @@ def test_production_requires_a_real_secret() -> None:
 def test_cors_origins_accept_comma_separated_values() -> None:
     settings = Settings(cors_origins="https://a.example, https://b.example")  # type: ignore[arg-type]
     assert settings.cors_origins == ["https://a.example", "https://b.example"]
+
+
+@pytest.mark.parametrize(
+    ("given", "expected"),
+    [
+        (
+            "postgres://u:p@db.example.com:5432/postgres",
+            "postgresql+psycopg://u:p@db.example.com:5432/postgres",
+        ),
+        ("postgresql://u:p@h/db?sslmode=require", "postgresql+psycopg://u:p@h/db?sslmode=require"),
+        ("postgresql+psycopg://u:p@h/db", "postgresql+psycopg://u:p@h/db"),
+        ("sqlite://", "sqlite://"),
+    ],
+)
+def test_database_urls_from_providers_are_accepted(given: str, expected: str) -> None:
+    assert Settings(database_url=given).database_url == expected

@@ -1,0 +1,28 @@
+# Render Blueprint for the AgroAI API (https://render.com/docs/blueprint-spec).
+# Render builds backend/Dockerfile, which also trains the model. The database is external
+# (Supabase); see docs/deployment/pilot.md for the full walkthrough.
+services:
+  - type: web
+    name: agroai-api
+    runtime: docker
+    plan: free
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    healthCheckPath: /health
+    autoDeploy: true
+    envVars:
+      - key: AGROAI_ENVIRONMENT
+        value: production
+      - key: AGROAI_SECRET_KEY
+        generateValue: true
+      # Supabase "Session pooler" connection string, with your database password filled in.
+      - key: AGROAI_DATABASE_URL
+        sync: false
+      # Your email address: the account you register with it becomes the admin.
+      - key: AGROAI_ADMIN_EMAILS
+        sync: false
+      # The website's origin (GitHub Pages), so browsers may call the API.
+      - key: AGROAI_CORS_ORIGINS
+        value: https://kenttolo.github.io
+      - key: AGROAI_LOG_LEVEL
+        value: INFO

@@ -27,6 +27,8 @@ class Settings(BaseSettings):
     log_level: str = "INFO"
 
     database_url: str = "postgresql+psycopg://agroai:agroai@localhost:5432/agroai"
+    # Hosted databases (e.g. Supabase's free tier) cap connections; keep the pool small.
+    database_pool_size: int = Field(default=5, ge=1, le=50)
 
     secret_key: SecretStr = SecretStr(_INSECURE_DEFAULT_KEY)
     jwt_algorithm: str = "HS256"
@@ -45,6 +47,15 @@ class Settings(BaseSettings):
 
     artifacts_dir: Path = BACKEND_DIR / "artifacts"
     dataset_path: Path = BACKEND_DIR / "data" / "crop_recommendation.csv"
+
+    @field_validator("database_url")
+    @classmethod
+    def _use_psycopg_driver(cls, value: str) -> str:
+        """Accept URLs as hosting providers show them (postgres://, postgresql://)."""
+        for prefix in ("postgres://", "postgresql://"):
+            if value.startswith(prefix):
+                return "postgresql+psycopg://" + value.removeprefix(prefix)
+        return value
 
     @field_validator("cors_origins", "admin_emails", mode="before")
     @classmethod
