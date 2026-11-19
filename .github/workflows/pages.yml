@@ -2,12 +2,12 @@ name: Deploy web app to GitHub Pages
 
 # Publishes the web app to GitHub Pages in one of two modes:
 #
-# * Live (when the repository variable AGROAI_API_URL is set, e.g. https://agroai-api.onrender.com):
-#   the app talks to that API server, with real accounts and a shared database.
-# * Demo (otherwise): a browser-only build that answers API requests in the browser
-#   (frontend/src/demo) and keeps each visitor's data in their own browser.
+# * Live (default): the app talks to the pilot API server, with real accounts and a shared
+#   database. The repository variable AGROAI_API_URL overrides the server address.
+# * Demo (when the repository variable AGROAI_DEMO is "true"): a browser-only build that answers
+#   API requests in the browser (frontend/src/demo) and keeps each visitor's data there.
 #
-# Set the variable under Settings -> Secrets and variables -> Actions -> Variables.
+# Set variables under Settings -> Secrets and variables -> Actions -> Variables.
 
 on:
   push:
@@ -26,16 +26,19 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      DEMO: ${{ vars.AGROAI_DEMO == 'true' }}
+      API_URL: ${{ vars.AGROAI_API_URL || 'https://agroai-api-c9cq.onrender.com' }}
     steps:
       - uses: actions/checkout@v4
 
       - uses: astral-sh/setup-uv@v5
-        if: vars.AGROAI_API_URL == ''
+        if: env.DEMO == 'true'
         with:
           version: "0.11.32"
           enable-cache: true
       - name: Train the model and export demo assets
-        if: vars.AGROAI_API_URL == ''
+        if: env.DEMO == 'true'
         working-directory: backend
         run: |
           uv sync --frozen --no-dev
@@ -47,11 +50,11 @@ jobs:
           node-version: 22
           cache: npm
           cache-dependency-path: frontend/package-lock.json
-      - name: Build the web app (${{ vars.AGROAI_API_URL && 'live' || 'demo' }} mode)
+      - name: Build the web app (${{ env.DEMO == 'true' && 'demo' || 'live' }} mode)
         working-directory: frontend
         env:
-          VITE_DEMO_MODE: ${{ vars.AGROAI_API_URL == '' }}
-          VITE_API_URL: ${{ vars.AGROAI_API_URL && format('{0}/api/v1', vars.AGROAI_API_URL) || '' }}
+          VITE_DEMO_MODE: ${{ env.DEMO }}
+          VITE_API_URL: ${{ env.DEMO != 'true' && format('{0}/api/v1', env.API_URL) || '' }}
           VITE_BASE: /${{ github.event.repository.name }}/
         run: |
           npm ci

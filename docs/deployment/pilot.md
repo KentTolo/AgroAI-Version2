@@ -65,15 +65,15 @@ first time it starts.
 
 ## 3. Switch the website to the live system (GitHub Pages)
 
-1. In the repository on GitHub, open **Settings → Secrets and variables → Actions →
-   Variables** and click **New repository variable**:
-   - Name: `AGROAI_API_URL`
-   - Value: your API URL from step 2, with no trailing slash (e.g. `https://agroai-api.onrender.com`)
-2. Open **Actions → Deploy web app to GitHub Pages → Run workflow**. About a minute later,
-   <https://kenttolo.github.io/AgroAI-Version2/> is the live system. The "Try the live demo"
-   buttons disappear.
+The [Pages workflow](../../.github/workflows/pages.yml) builds the live system by default, pointed
+at the pilot API (`https://agroai-api-c9cq.onrender.com`). Every push to `main` redeploys it.
 
-To go back to the browser-only demo later, delete the variable and run the workflow again.
+- **Different API address** (for example a new Render service): add the repository variable
+  `AGROAI_API_URL` under **Settings → Secrets and variables → Actions → Variables**, set to the
+  bare API URL with no trailing slash and no `/api/v1`.
+- **Back to the browser-only demo:** add the variable `AGROAI_DEMO` with the value `true`.
+
+After changing a variable, open **Actions → Deploy web app to GitHub Pages → Run workflow**.
 
 ## 4. Start the pilot
 
@@ -122,7 +122,7 @@ you can; a home NPK and pH test kit is a cheaper, rougher alternative. Test agai
 |---|---|
 | `/health/ready` shows `"database":"unavailable"` | Wrong database URL. Check the password, that you used the *Session pooler* string, and that `?sslmode=require` is at the end. Update the variable in Render → Environment. |
 | Render deploy fails on start with "AGROAI_SECRET_KEY must be set" | The generated key is missing. Add `AGROAI_SECRET_KEY` in Render → Environment with a long random value. |
-| Website says "Cannot reach the AgroAI server" | The API is waking up (wait a minute and retry), or `AGROAI_API_URL` is wrong. It must be the bare API URL, without `/api/v1`. |
+| Website says "Cannot reach the AgroAI server" | The API is waking up (wait a minute and retry), or the API address the website was built with is wrong (see step 3). It must be the bare API URL, without `/api/v1`. |
 | Requests blocked by CORS in the browser console | `AGROAI_CORS_ORIGINS` in Render must be `https://kenttolo.github.io` (no path, no trailing slash). |
 | No **Admin dashboard** in the menu | The account's email doesn't match `AGROAI_ADMIN_EMAILS`. Fix the variable in Render; the change applies after the automatic redeploy. |
 | Weather card shows a request-limit error | Open-Meteo's daily limit was reached for the server's IP. It resets daily; existing history keeps working. |

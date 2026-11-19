@@ -6,8 +6,8 @@ AgroAI turns a soil test and local weather into planting decisions. It ranks the
 to thrive on a field, explains which conditions fall short for a chosen crop and what to do about
 each one, and tracks every planting from sowing to harvest.
 
-**Live demo: https://kenttolo.github.io/AgroAI-Version2/** (runs entirely in your browser; choose
-"Use the demo account" to explore a ready-made farm)
+**Live pilot: https://kenttolo.github.io/AgroAI-Version2/** (create an account to start; the API
+runs on Render's free tier, so the first request after a quiet spell takes up to a minute)
 
 ![Dashboard](docs/images/dashboard.webp)
 
@@ -75,8 +75,9 @@ Run `make help` for every task.
 
 ### Browser-only demo (GitHub Pages)
 
-The [Pages workflow](.github/workflows/pages.yml) publishes a static build of the web app on every
-push to `main`. With no server available, the demo answers API requests inside the browser
+The [Pages workflow](.github/workflows/pages.yml) publishes the web app on every push to `main`,
+connected to the pilot API. With the repository variable `AGROAI_DEMO=true` it instead publishes a
+browser-only demo, which answers API requests inside the browser
 ([`frontend/src/demo`](frontend/src/demo)): the trained Random Forest is exported to JSON and
 evaluated in JavaScript (the backend tests check that its predictions match scikit-learn
 exactly), and the advisory, growth and simulator rules are exported from the Python services.

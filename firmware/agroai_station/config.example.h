@@ -14,7 +14,7 @@
 #define WIFI_PASSWORD "your-wifi-password"
 
 // --- AgroAI (copied from the "Add station" dialog) ----------------------------------------
-#define AGROAI_API_URL    "https://agroai-api.onrender.com/api/v1/telemetry"
+#define AGROAI_API_URL    "https://agroai-api-c9cq.onrender.com/api/v1/telemetry"
 #define AGROAI_DEVICE_KEY "agk_paste-your-key-here"
 
 // --- Reporting ---------------------------------------------------------------------------
